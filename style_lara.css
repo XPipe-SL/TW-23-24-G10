@@ -1,0 +1,168 @@
+html,body{
+    width: 100%; height: 100%;
+    margin: 0px; padding: 0px;
+}
+
+:root{
+    --j1: black;
+    --j2: white;
+    --peça_size:70px;
+    --bloco_size: calc(var(--peça_size)*1.15);
+}
+
+.everything{
+    height: 100%;
+    display: flex;
+    /*background-color: cyan;*/
+    align-items: stretch;
+
+}
+
+.button {
+  background-color: #4CAF50; /* Green */
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+}
+
+.main{  
+    flex-basis: 80%; 
+    background-color: lightgrey;
+    border-radius: 7px;
+    margin: 1px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;/*space-around;*/
+    align-items: center;
+    /*justify-content: space-between;*/
+    
+}
+.logotipo{
+    /*background-color: blanchedalmond;*/
+    border-radius: 7px;
+    padding: 2%;
+    margin: 1px;
+    font-family: monospace; font-size: 50pt;
+    text-align: left;
+}
+.logo{
+    display: inline-grid;
+    /*background-color: lightcyan;*/
+    grid-template-columns: auto auto auto;
+    gap: 5px;
+    position: absolute; top: 23px; right: 25px; 
+
+}
+
+.circle{
+    height: 23px;
+    width: 23px;
+    background-color: black;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+
+.tab_main{
+    display: flex;
+
+}
+.messages{
+    border: solid;
+    border-color: grey;
+    padding: 3px;
+    margin: 10px;
+    width: calc(var(--bloco_size)*5);
+}
+
+
+.tabuleiro{
+    background-color: whitesmoke;
+    /*height: 80%;*/
+    display: grid;
+    grid-template-columns: auto auto auto auto auto;
+    /*grid-template-rows: auto auto;*/
+    gap: 3px;
+    padding: 3px;
+    margin: 10px;
+}
+
+.fora{
+    border: solid;
+    border-color: var(--j1);
+    padding: 3px;
+    margin: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    /*align-items: center;*/
+    /*align-content: center*/
+    align-content: flex-start;
+    gap: 2px;
+}
+
+.fora.j1{
+    border-color: var(--j1);
+    flex-flow: row-reverse wrap-reverse;
+    
+
+}
+
+.fora.j2{
+    border-color: var(--j2);
+    
+}
+
+
+.peça{
+    aspect-ratio: 1/1;
+    width: var(--peça_size);
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.peça.j1{
+   background-color: var(--j1);
+}
+.peça.j2{
+    background-color: var(--j2);
+}
+
+.bloco{
+    background-color: dimgray;
+    aspect-ratio: 1/1;
+    width: var(--bloco_size); /*would love to make it not fix but relative to parents size*/
+    display: flex;
+     justify-content: center;
+    align-items: center;
+}
+
+
+
+.sidebar{
+    flex-basis: 20%;
+    align-items: stretch;
+    display: flex;
+    flex-direction: column;
+    align-content: stretch;
+    align-items: stretch;
+    margin: 1px;
+}
+
+.login{
+    background-color: gray;
+    border-radius: 7px;
+    padding: 2%;
+    margin: 1px;
+}
+
+.options{
+    background-color: darkcyan;
+    border-radius: 7px;
+    padding: 2%;
+    margin: 1px;
+    flex:1;
+}
