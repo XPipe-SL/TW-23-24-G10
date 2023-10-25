@@ -10,10 +10,34 @@
 <body>
     
     <div class="everything">
+
+        <div id="instruções"> <!-- hidden div while we dont press the instruction button -->
+            <span class="fechar" onclick="closeInstruction()">X</span> <!-- o botão para fehcar as isntruções -->
+            No jogo Dara é considerada uma linha qualquer sequência de <span class="destacado">3 peças</span> na <span class="destacado">horizontal</span> ou <span class="destacado">vertical</span> apenas e não na diagonal.
+            O jogo divide-se em duas fases:
+            <h1>1ª fase:</h1>
+            <ul>
+                <li>Esta fase consiste em colocar as peças no tabuleiro;</li>
+                <li>Cada jogador coloca alternadamente uma peça numa casa livre;</li>
+                <li>Não podem existir mais de 3 peças em linha;</li>
+            </ul>
+            <h1>2ª fase:</h1>
+            <ul>
+                <li>Cada jogador move alternadamente uma peça sua;</li>
+                <li>Uma peça só pode ser movida para uma casa na <span class="destacado">horizontal</span> ou  <span class="destacado">vertical</span>;</li>
+                <li>Uma peça não pode regressar à posição da jogada anterior, apenas nas jogadas seguintes;</li>
+                <li>Quando se tem uma linha pode-se tirar uma peça do adversário do tabuleiro;</li>
+                <li>Só se pode remover uma peça do tabuleiro por jogada, mesmo tendo feito mais que uma linha;</li>
+                <li>Não se podem formar linhas com mais de 3 peças;</li>
+            </ul>
+            O jogo acaba quando ninguém puder ganhar, ou seja, ou tiver duas peças no tabuleiro ou não puder fazer nenhuma jogada válida. <br/>
+            <div style="position: relative; top:20%; width:100%; text-align: center; font-size: 300%;"> Divirta-se!</div>
+        </div>
+
         <div class = "main">
             <div class="above_tab">
                 <button>Iniciar Jogo</button>
-                <button>Visualizar Instruções</button>
+                <button onclick="openInstruction()">Visualizar Instruções</button>
             </div>
             <div class="tab_main" id="tab_main" >
                 <div class="fora j1" id="fora1">
@@ -114,19 +138,17 @@
                             <label for="ia"> Inteligência artificial </label>
                         </div>
                         Primeiro jogador:
-                        <div class="jogo">
-                            <input type="radio" id="preto" name="primeiro">
-                            <label for="preto"> Preto </label>  <br>
-                            <input type="radio" id="branco" name="primeiro">
-                            <label for="branco"> Branco </label>
-                        </div>
+                        <select size="1" name="cor" id="cor">
+                            <option>Preto</option>
+                            <option>Branco</option>
+                        </select> <br/>
                         Nível de AI
                         <select size="1" name="nivel">
                             <option>Principiante</option>
                             <option>Amador</option>
                             <option>Profissional</option>
                         </select> <br/>
-                        <input type="button" name="submit" value="Submeter" onclick="new Game()" />
+                        <input type="button" name="submit" value="Submeter" onclick="new Game(document.getElementById('cor').value)" />
                     </form>
                 </details>
             </div>

@@ -74,9 +74,10 @@ const tab_main = document.getElementById("tab_main");
 
 class Game{
 	constructor(j1,j2){
-		if (j1 === undefined) {j1 = "black"}
-		if (j2 === undefined) {j2 = "white"}
-		
+		if (j1 === undefined && j2 === undefined) {j1 = "black"; j2 = "white";}
+		if (j1 == 'Preto') {j1 = "black"; j2 = "white";}
+		else if (j1 == 'Branco') {j1 = "white"; j2 = "black";}
+
 		this.current = j1;
 		this.tabuleiro = new Tabuleiro();
 		this.fora_j1 = new Fora(true);
@@ -89,6 +90,16 @@ class Game{
 		
 	}
 
+}
+
+function openInstruction(){
+	var instruction = document.getElementById("instruções");
+	instruction.style.display = 'block';
+}
+
+function closeInstruction(){
+	var instruction = document.getElementById("instruções");
+	instruction.style.display = 'none';
 }
 
 var mygame = new Game();
