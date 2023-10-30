@@ -1,8 +1,6 @@
 const num_peças =12 ;
 //https://www.youtube.com/watch?v=k1kC8b6t2kg
 
-window.onload = function() {new Game();};
-
 class Tabuleiro{
 	constructor(linhas,colunas){
 		this.colunas = linhas;
@@ -76,7 +74,10 @@ class Fora {
 
 class Game {
     constructor(j1, j2) {
+        this.restore(j1,j2);
+    }
 
+    restore (j1, j2) {
         if (j1 === undefined && j2 === undefined) {
 			j1 = "black";
             j2 = "white";
@@ -297,9 +298,20 @@ class Game {
         return false;
     }
 
-    // This can probaly be subsumed into possivel_colocar to streamline
-    // Identical except this one skips checking [originalLine][originalColumn]
     possivel_mover(jogador, linha, coluna, originalLine, originalColumn){
+        if (coluna != originalColumn){
+            if (coluna != originalColumn -1 && coluna != originalColumn + 1){
+                return false;
+            }
+
+            if (linha != originalLine){
+                return false;
+            }
+        } else if ( linha != originalLine - 1 && linha != originalLine + 1 ){
+            return false;
+        }
+
+
         if (this.tabuleiro[linha][coluna] != 'j1' && this.tabuleiro[linha][coluna] != 'j2') {
 			if (coluna <= this.colunas - 3) { //avalia linha para a frente
                 let check = true;
@@ -307,7 +319,7 @@ class Game {
                     let checkLine = linha;
                     let checkColumn = coluna + i;
 
-                    check &&= (originalLine != checkLine && originalColumn != checkColumn && this.tabuleiro[checkLine][checkColumn] == jogador);
+                    check &&= ( !(originalLine == checkLine && originalColumn == checkColumn) && this.tabuleiro[checkLine][checkColumn] == jogador);
                 }
 
                 if (check) {
@@ -315,46 +327,132 @@ class Game {
                 }
 			}
             
-            // TODO: rest of the checks
 			if (coluna >= 4) { //avalia linha para tras
-				if (this.tabuleiro[linha][coluna - 1] == jogador && this.tabuleiro[linha][coluna - 2] == jogador && this.tabuleiro[linha][coluna - 3] == jogador) {
-					return false;
-				}
+
+                let check = true;
+                for (let i=1; i<=3; i++){
+                    let checkLine = linha;
+                    let checkColumn = coluna - i;
+
+                    check &&= ( !(originalLine == checkLine && originalColumn == checkColumn) && this.tabuleiro[checkLine][checkColumn] == jogador);
+                }
+
+                if (check) {
+                    return false;
+                }
 			}
 	
 	
 			if (linha <= this.linhas - 3) { //avalia linha para baixo
-				if (this.tabuleiro[linha + 1][coluna] == jogador && this.tabuleiro[linha + 2][coluna] == jogador && this.tabuleiro[linha + 3][coluna] == jogador) {
-					return false;
-				}
+
+                let check = true;
+                for (let i=1; i<=3; i++){
+                    let checkLine = linha + i;
+                    let checkColumn = coluna;
+
+                    check &&= ( !(originalLine == checkLine && originalColumn == checkColumn) && this.tabuleiro[checkLine][checkColumn] == jogador);
+                }
+
+                if (check) {
+                    return false;
+                }
 			}
 	
 			if (linha >= 4) { //avalia linha para cima
-				if (this.tabuleiro[linha - 1][coluna] == jogador && this.tabuleiro[linha - 2][coluna] == jogador && this.tabuleiro[linha - 3][coluna] == jogador) {
-					return false;
-				}
+
+                let check = true;
+                for (let i=1; i<=3; i++){
+                    let checkLine = linha - i;
+                    let checkColumn = coluna;
+
+                    check &&= ( !(originalLine == checkLine && originalColumn == checkColumn) && this.tabuleiro[checkLine][checkColumn] == jogador);
+                }
+
+                if (check) {
+                    return false;
+                }
 			}
 
             if (coluna > 1 && coluna <= this.colunas - 2) { //avalia situações do tipo b_bb
-                if (this.tabuleiro[linha][coluna + 1] == jogador && this.tabuleiro[linha][coluna + 2] == jogador && this.tabuleiro[linha][coluna - 1] == jogador){
+
+                let check = true;
+                for (let i=1; i<=2; i++){
+                    let checkLine = linha;
+                    let checkColumn = coluna + i;
+
+                    check &&= ( !(originalLine == checkLine && originalColumn == checkColumn) && this.tabuleiro[checkLine][checkColumn] == jogador);
+                }
+                {
+                    let checkLine = linha;
+                    let checkColumn = coluna - 1;
+
+                    check &&= ( !(originalLine == checkLine && originalColumn == checkColumn) && this.tabuleiro[checkLine][checkColumn] == jogador);
+                }
+
+                if (check) {
                     return false;
                 }
             }
 
             if (coluna > 2 && coluna <= this.colunas - 1) { //avalia situações do tipo bb_b
-                if (this.tabuleiro[linha][coluna + 1] == jogador && this.tabuleiro[linha][coluna - 2] == jogador && this.tabuleiro[linha][coluna - 1] == jogador){
+
+                let check = true;
+                for (let i=1; i<=2; i++){
+                    let checkLine = linha;
+                    let checkColumn = coluna - i;
+
+                    check &&= ( !(originalLine == checkLine && originalColumn == checkColumn) && this.tabuleiro[checkLine][checkColumn] == jogador);
+                }
+                {
+                    let checkLine = linha;
+                    let checkColumn = coluna + 1;
+
+                    check &&= ( !(originalLine == checkLine && originalColumn == checkColumn) && this.tabuleiro[checkLine][checkColumn] == jogador);
+                }
+
+                if (check) {
                     return false;
-                } 
+                }
             }
 
             if (linha > 1 && linha <= this.linhas - 2) { //avalia situações do tipo b_bb em coluna
-                if (this.tabuleiro[linha + 1][coluna] == jogador && this.tabuleiro[linha + 2][coluna] == jogador && this.tabuleiro[linha - 1][coluna] == jogador) {
+
+                let check = true;
+                for (let i=1; i<=2; i++){
+                    let checkLine = linha + i;
+                    let checkColumn = coluna;
+
+                    check &&= ( !(originalLine == checkLine && originalColumn == checkColumn) && this.tabuleiro[checkLine][checkColumn] == jogador);
+                }
+                {
+                    let checkLine = linha - 1;
+                    let checkColumn = coluna;
+
+                    check &&= ( !(originalLine == checkLine && originalColumn == checkColumn) && this.tabuleiro[checkLine][checkColumn] == jogador);
+                }
+
+                if (check) {
                     return false;
-                } 
+                }
             }
             
             if (linha > 2 && linha <= this.linhas -1) { //avalia situações do tipo bb_b em coluna
-                if (this.tabuleiro[linha + 1][coluna] == jogador && this.tabuleiro[linha - 2][coluna] == jogador && this.tabuleiro[linha - 1][coluna] == jogador){ 
+
+                let check = true;
+                for (let i=1; i<=2; i++){
+                    let checkLine = linha - i;
+                    let checkColumn = coluna;
+
+                    check &&= ( !(originalLine == checkLine && originalColumn == checkColumn) && this.tabuleiro[checkLine][checkColumn] == jogador);
+                }
+                {
+                    let checkLine = linha + 1;
+                    let checkColumn = coluna;
+
+                    check &&= ( !(originalLine == checkLine && originalColumn == checkColumn) && this.tabuleiro[checkLine][checkColumn] == jogador);
+                }
+
+                if (check) {
                     return false;
                 }
             }
@@ -402,7 +500,6 @@ function drop(ev) {
         }  
     } else { //fase 2
 
-        // TODO: movement to adjacent blocks only
         // TODO: removal of pieces
         if (alvoId.substring(0,1) != "j" && game.mover_peça(data, alvoId)) {
             ev.target.appendChild(document.getElementById(data));
