@@ -1,5 +1,4 @@
 const num_peças =12 ;
-var mudança_fase = 0;
 //https://www.youtube.com/watch?v=k1kC8b6t2kg
 
 window.onload = function() {new Game();};
@@ -106,68 +105,66 @@ class Game {
         this.tabuleiro = this.tabuleiro_desenho.tabuleiro1;
         this.linhas_j1 = 0;
         this.linhas_j2 = 0;
+        this.jogadas = 0;
+        this.fase = 1;
     }
 
     //não principais
     vez() { //verifica quem tem a vez de jogar
-        var j1 = 0;
-        var j2 = 0;
-        for(var linha = 1; linha<=this.linhas; linha++) {
-			for(var coluna = 1; coluna<=this.colunas; coluna++) {
-                if ('j1' == this.tabuleiro[linha][coluna]) {j1++;}
-                if ('j2' == this.tabuleiro[linha][coluna]) {j2++;}
-            }
-        }
-        if (j1>j2) {return 'j2';}
-        else {return 'j1';}
+        if (this.jogadas % 2 == 0) {return 'j1';}
+        else {return 'j2';}
     }
 
     mudança() { //deteta o fim da fase 1 e faz as mudanças necessárias para avançar para a fase 2
-        if(mudança_fase == 24) {
-            for(var i=0; i<num_peças; i++){
-                const peçaj1 = document.getElementById("j1" + (i + 1));
-                const peçaj2 = document.getElementById("j2" + (i + 1));
-                const fora1 = document.getElementById('fora1');
-                const fora2 = document.getElementById('fora2');
-                peçaj1.setAttribute("draggable", "true");
-                peçaj2.setAttribute("draggable", "true");
-            }
+        for(var i=0; i<num_peças; i++){
+            const peçaj1 = document.getElementById("j1" + (i + 1));
+            const peçaj2 = document.getElementById("j2" + (i + 1));
             const fora1 = document.getElementById('fora1');
             const fora2 = document.getElementById('fora2');
-            fora1.setAttribute("ondrop", "drop(event)"); 
-            fora1.setAttribute("ondragover", "allowDrop(event)");
-            fora2.setAttribute("ondrop", "drop(event)"); 
-            fora2.setAttribute("ondragover", "allowDrop(event)");
+            peçaj1.setAttribute("draggable", "true");
+            peçaj2.setAttribute("draggable", "true");
         }
+        const fora1 = document.getElementById('fora1');
+        const fora2 = document.getElementById('fora2');
+        fora1.setAttribute("ondrop", "drop(event)"); 
+        fora1.setAttribute("ondragover", "allowDrop(event)");
+        fora2.setAttribute("ondrop", "drop(event)"); 
+        fora2.setAttribute("ondragover", "allowDrop(event)");
+        console.log('fase 2');
+        this.fase++;
     }
-
+    
     fez_linha(jogador, linha, coluna) {
         var count = 0;
         //avaliar linhas horizontais
-        if (coluna <= this.colunas - 3) { //avalia linha para a frente
+        if (coluna <= this.colunas - 2) { //avalia linha para a frente _b
             if (this.tabuleiro[linha][coluna] == jogador && this.tabuleiro[linha][coluna + 1] == jogador && this.tabuleiro[linha][coluna + 2] == jogador) {
                 count++;
             }
-        } else if (coluna >= 4) { //avalia linha para tras
+        }
+        if (coluna >= 3) { //avalia linha para tras bb_
             if (this.tabuleiro[linha][coluna] == jogador && this.tabuleiro[linha][coluna - 1] == jogador && this.tabuleiro[linha][coluna - 2] == jogador) {
-                count
+                count++;
             }
-        } else if (coluna > 1 || coluna < this.colunas) { //avalia linha b_b
+        }
+        if (coluna > 1 || coluna < this.colunas) { //avalia linha b_b
             if (this.tabuleiro[linha][coluna - 1] == jogador && this.tabuleiro[linha][coluna] == jogador && this.tabuleiro[linha][coluna + 1] == jogador) {
                 count++;
             }
         }
 
         //avaliar linhas verticais
-        if (linha <= this.linhas - 3) { //avalia linha para baixo
+        if (linha <= this.linhas - 2) { //avalia linha para baixo
             if (this.tabuleiro[linha][coluna] == jogador && this.tabuleiro[linha + 1][coluna] == jogador && this.tabuleiro[linha + 2][coluna] == jogador) {
                 count++;
             }
-        } else if (linha >= 4) { //avalia linha para cima
+        }
+        if (linha >= 3) { //avalia linha para cima
             if (this.tabuleiro[linha][coluna] == jogador && this.tabuleiro[linha - 1][coluna] == jogador && this.tabuleiro[linha - 2][coluna] == jogador) {
                 count++;
             }
-        } else if (linha > 1 || linha < this.linhas) { //avalia b_b na vertical
+        }
+        if (linha > 1 && linha < this.linhas) { //avalia b_b na vertical
             if (this.tabuleiro[linha - 1][coluna] == jogador && this.tabuleiro[linha][coluna] == jogador && this.tabuleiro[linha + 1][coluna] == jogador) {
                 count++;
             }
@@ -179,24 +176,27 @@ class Game {
     //principais
 
     colocar_peça(peçaId, alvoId) {
-        const linha = parseInt(alvoId.substring(1, 2));
-        const coluna = parseInt(alvoId.substring(2, 3));
-		const jogador = peçaId.substring(0,2);
+        const linha = parseInt(alvoId.substring(1, 2)); //obtem a linha do bloco em causa
+        const coluna = parseInt(alvoId.substring(2, 3)); //obtem a coluna do bloco em causa
+		const jogador = peçaId.substring(0,2); //obtem o jogador a quem pertence a peça
         const peça = document.getElementById(peçaId);
-        if(peça.draggable && jogador == this.vez()){
-		    if(this.possivel_colocar(jogador,linha,coluna)){
-                this.tabuleiro[linha][coluna] = jogador;
-                if(jogador == 'j1'){
-                    this.linhas_j1 += this.fez_linha();
+        if(peça.draggable && jogador == this.vez()){ //se a peça não estiver no tabuleiro e for a vez do jogador
+		    if(this.possivel_colocar(jogador,linha,coluna)){ //jogada válida
+                this.tabuleiro[linha][coluna] = jogador; //coloca a peça no array tabuleiro
+                if(jogador == 'j1'){ 
+                    this.linhas_j1 += this.fez_linha(jogador, linha, coluna);
+                } else {
+                    this.linhas_j2 += this.fez_linha(jogador, linha, coluna);
                 }
-                peça.draggable = false;
+                peça.draggable = false; //bloqueia a peça durnte a fase 1 após ser colocada no tabuleiro
+                console.log(this.linhas_j1, this.linhas_j2);
                 return true;
-            } else {
+            } else { //jogada inválida
                 mensagem('Movimento inválido');
             }
-        } else if(!peça.draggable) {
+        } else if(!peça.draggable) { //se a peça já estiver no tabuleiro
             mensagem('Não pode mover uma peça já posta no tabuleiro.'); 
-        } else if(jogador != this.vez()){
+        } else if(jogador != this.vez()){ //se não for a vez deste jogador
             mensagem('Espere pela sua vez!');
         }
     }
@@ -257,10 +257,21 @@ class Game {
 		return false;
 	}
 
-    //ideia: fazer a contagem do número de linhas de cada jogador
-    //
+    mover_peça(peçaId, alvoId) {
+        const linha = parseInt(alvoId.substring(1, 2)); //obtem a linha do bloco em causa
+        const coluna = parseInt(alvoId.substring(2, 3)); //obtem a coluna do bloco em causa
+		const jogador = peçaId.substring(0,2); //obtem o jogador a quem pertence a peça
+        const peça = document.getElementById(peçaId);
+        if(jogador == this.vez()) {
+            if(this.possivel_mover(jogador, linha, coluna)) {
+                
+            }
+        }
+    }
 
-    mover_peça(peçaId, alvoId) {}
+    retirar_peça(peçaId, alvoId) {
+
+    }
 }
 
 function openInstruction() {
@@ -285,14 +296,19 @@ function drop(ev) {
     ev.preventDefault(); // Prevent the default action of the element
     var data = ev.dataTransfer.getData("text");
     var alvoId = ev.target.id;
-    if(mudança_fase < 24) { //fase 1
+    if(game.jogadas < 24) { //fase 1
         if (alvoId.substring(0,1) != "j" && game.colocar_peça(data, alvoId)){ //única maneira que consegui de evitar que uma peça seja movida para dentro da mesma peça
             ev.target.appendChild(document.getElementById(data));
             mensagem('Movimento efetuado com sucesso!');
-            mudança_fase++;
+            game.jogadas++;
+            if(game.jogadas == 24) {
+                game.mudança();
+            }
         }  
     } else { //fase 2
-        
+        if (alvoId.substring(0,1) != "j" && game.mover_peça(data, alvoId)) {
+
+        }
     }
 }
 
