@@ -40,11 +40,11 @@
                 <button onclick="openInstruction()">Visualizar Instruções</button>
             </div>
             <div class="tab_main" id="tab_main" >
-                <div class="fora j1" id="fora1"></div> <!-- lugar para as peças na esquerda -->
+                <div class="fora j1" id="fora1" ondrop="drop(event)" ondragover="allowDrop(event)"></div> <!-- lugar para as peças na esquerda -->
 
                 <div class="tabuleiro" id="tab"></div> <!-- Tabuleiro central -->
 
-                <div class="fora j2" id="fora2"></div> <!-- lugar para as peças na direita -->
+                <div class="fora j2" id="fora2" ondrop="drop(event)" ondragover="allowDrop(event)"></div> <!-- lugar para as peças na direita -->
             </div>
             <div id="mensagens">
                     Aqui irão aparecer as mensagens!
@@ -112,7 +112,7 @@
                             <option>Amador</option>
                             <option>Profissional</option>
                         </select> <br/>
-                        <input type="button" name="submit" value="Submeter" onclick="new Game(document.getElementById('cor').value)" />
+                        <input type="button" name="submit" value="Submeter" onclick="game.regenerate(document.getElementById('altura').value, document.getElementById('comprimento').value, document.getElementById('cor').value)" />
                     </form>
                 </details>
             </div>
