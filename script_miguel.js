@@ -180,6 +180,7 @@ class Game {
         const coluna = parseInt(alvoId.substring(2, 3)); //obtem a coluna do bloco em causa
 		const jogador = peçaId.substring(0,2); //obtem o jogador a quem pertence a peça
         const peça = document.getElementById(peçaId);
+
         if(peça.draggable && jogador == this.vez()){ //se a peça não estiver no tabuleiro e for a vez do jogador
 		    if(this.possivel_colocar(jogador,linha,coluna)){ //jogada válida
                 this.tabuleiro[linha][coluna] = jogador; //coloca a peça no array tabuleiro
@@ -194,11 +195,14 @@ class Game {
             } else { //jogada inválida
                 mensagem('Movimento inválido');
             }
+
         } else if(!peça.draggable) { //se a peça já estiver no tabuleiro
             mensagem('Não pode mover uma peça já posta no tabuleiro.'); 
         } else if(jogador != this.vez()){ //se não for a vez deste jogador
             mensagem('Espere pela sua vez!');
         }
+
+        return false;
     }
 
 	possivel_colocar(jogador,linha, coluna) {
@@ -261,12 +265,103 @@ class Game {
         const linha = parseInt(alvoId.substring(1, 2)); //obtem a linha do bloco em causa
         const coluna = parseInt(alvoId.substring(2, 3)); //obtem a coluna do bloco em causa
 		const jogador = peçaId.substring(0,2); //obtem o jogador a quem pertence a peça
+
         const peça = document.getElementById(peçaId);
+        const originalBlock = document.getElementById(peçaId).parentNode; // original block of the piece
+        const originalLine = parseInt(originalBlock.id.substring(1,2)); // original line of that block
+        const originalColumn = parseInt(originalBlock.id.substring(2,3)); // original column of that block
+        
         if(jogador == this.vez()) {
-            if(this.possivel_mover(jogador, linha, coluna)) {
+            if(this.possivel_mover(jogador, linha, coluna, originalLine, originalColumn)) {
+                // retira a peça do array tabuleiro
+                this.tabuleiro[originalLine][originalColumn] = undefined;
                 
+                this.tabuleiro[linha][coluna] = jogador; //coloca a peça no array tabuleiro
+                
+                if(jogador == 'j1'){ 
+                    this.linhas_j1 += this.fez_linha(jogador, linha, coluna);
+                } else {
+                    this.linhas_j2 += this.fez_linha(jogador, linha, coluna);
+                }
+                
+                console.log(this.linhas_j1, this.linhas_j2);
+                return true;
+
+            } else {
+                mensagem('Movimento inválido');
             }
+        } else {
+            mensagem('Espere pela sua vez!');
         }
+
+        return false;
+    }
+
+    // This can probaly be subsumed into possivel_colocar to streamline
+    // Identical except this one skips checking [originalLine][originalColumn]
+    possivel_mover(jogador, linha, coluna, originalLine, originalColumn){
+        if (this.tabuleiro[linha][coluna] != 'j1' && this.tabuleiro[linha][coluna] != 'j2') {
+			if (coluna <= this.colunas - 3) { //avalia linha para a frente
+                let check = true;
+                for (let i=1; i<=3; i++){
+                    let checkLine = linha;
+                    let checkColumn = coluna + i;
+
+                    check &&= (originalLine != checkLine && originalColumn != checkColumn && this.tabuleiro[checkLine][checkColumn] == jogador);
+                }
+
+                if (check) {
+                    return false;
+                }
+			}
+            
+            // TODO: rest of the checks
+			if (coluna >= 4) { //avalia linha para tras
+				if (this.tabuleiro[linha][coluna - 1] == jogador && this.tabuleiro[linha][coluna - 2] == jogador && this.tabuleiro[linha][coluna - 3] == jogador) {
+					return false;
+				}
+			}
+	
+	
+			if (linha <= this.linhas - 3) { //avalia linha para baixo
+				if (this.tabuleiro[linha + 1][coluna] == jogador && this.tabuleiro[linha + 2][coluna] == jogador && this.tabuleiro[linha + 3][coluna] == jogador) {
+					return false;
+				}
+			}
+	
+			if (linha >= 4) { //avalia linha para cima
+				if (this.tabuleiro[linha - 1][coluna] == jogador && this.tabuleiro[linha - 2][coluna] == jogador && this.tabuleiro[linha - 3][coluna] == jogador) {
+					return false;
+				}
+			}
+
+            if (coluna > 1 && coluna <= this.colunas - 2) { //avalia situações do tipo b_bb
+                if (this.tabuleiro[linha][coluna + 1] == jogador && this.tabuleiro[linha][coluna + 2] == jogador && this.tabuleiro[linha][coluna - 1] == jogador){
+                    return false;
+                }
+            }
+
+            if (coluna > 2 && coluna <= this.colunas - 1) { //avalia situações do tipo bb_b
+                if (this.tabuleiro[linha][coluna + 1] == jogador && this.tabuleiro[linha][coluna - 2] == jogador && this.tabuleiro[linha][coluna - 1] == jogador){
+                    return false;
+                } 
+            }
+
+            if (linha > 1 && linha <= this.linhas - 2) { //avalia situações do tipo b_bb em coluna
+                if (this.tabuleiro[linha + 1][coluna] == jogador && this.tabuleiro[linha + 2][coluna] == jogador && this.tabuleiro[linha - 1][coluna] == jogador) {
+                    return false;
+                } 
+            }
+            
+            if (linha > 2 && linha <= this.linhas -1) { //avalia situações do tipo bb_b em coluna
+                if (this.tabuleiro[linha + 1][coluna] == jogador && this.tabuleiro[linha - 2][coluna] == jogador && this.tabuleiro[linha - 1][coluna] == jogador){ 
+                    return false;
+                }
+            }
+
+			return true;
+		}
+		return false;
     }
 
     retirar_peça(peçaId, alvoId) {
@@ -296,18 +391,23 @@ function drop(ev) {
     ev.preventDefault(); // Prevent the default action of the element
     var data = ev.dataTransfer.getData("text");
     var alvoId = ev.target.id;
-    if(game.jogadas < 24) { //fase 1
+    if(game.jogadas < 2*num_peças) { //fase 1
         if (alvoId.substring(0,1) != "j" && game.colocar_peça(data, alvoId)){ //única maneira que consegui de evitar que uma peça seja movida para dentro da mesma peça
             ev.target.appendChild(document.getElementById(data));
             mensagem('Movimento efetuado com sucesso!');
             game.jogadas++;
-            if(game.jogadas == 24) {
+            if(game.jogadas == 2*num_peças) {
                 game.mudança();
             }
         }  
     } else { //fase 2
-        if (alvoId.substring(0,1) != "j" && game.mover_peça(data, alvoId)) {
 
+        // TODO: movement to adjacent blocks only
+        // TODO: removal of pieces
+        if (alvoId.substring(0,1) != "j" && game.mover_peça(data, alvoId)) {
+            ev.target.appendChild(document.getElementById(data));
+            mensagem('Movimento efetuado com sucesso!');
+            game.jogadas++;
         }
     }
 }
