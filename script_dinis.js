@@ -98,6 +98,8 @@ class Game {
         this.tabuleiro_desenho = new Tabuleiro(this.colunas,this.linhas);
         this.fora_j1 = new Fora(true);
         this.fora_j2 = new Fora(false);
+        this.peças_j1 = num_peças;
+        this.peças_j2 = num_peças;
 
         var r = document.querySelector(':root');
         r.style.setProperty('--j1', j1);
@@ -477,9 +479,54 @@ class Game {
         if (peça_removida != this.vez()) {
             this.tabuleiro[linha][coluna] = undefined;
             this.piece_to_remove = false;
+            if (peça_removida == "j1") {this.peças_j1-=1;}
+            else{ this.peças_j2 -=1;}
             return true;
         }
         return false;
+    }
+
+    game_finished(){
+        if(this.peças_j1<3){
+            mensagem("Jogador 2 ganhou! Para jogar de novo reinicie o jogo.");
+            fim_mensagem("Parabéns Jogador 2, você ganhou!")
+            openEnd();
+            return true;
+        }
+        else if(this.peças_j2<3){
+            mensagem("Jogador 1 ganhou! Para jogar de novo reinicie o jogo.")
+            fim_mensagem("Parabéns Jogador 1, você ganhou!")
+            openEnd();
+            return true;
+        }
+        return false;
+    }
+
+    desistir() { //used the same div of the winning message to avoid creating new ones
+        if(this.vez() == 'j1') {
+            mensagem("O Jogador 1 desistiu! Se quiser jogar reinicie o jogo!");
+            fim_mensagem("O Jogador 1 desistiu!");
+        } else {
+            mensagem('O Jogador 2 desistiu! Se quiser jogar reinicie o jogo!');
+            fim_mensagem("O Jogador 2 desistiu!");
+        }
+        for(var i=0; i<num_peças; i++){
+            const peçaj1 = document.getElementById("j1" + (i + 1));
+            const peçaj2 = document.getElementById("j2" + (i + 1));
+            peçaj1.setAttribute("draggable", "false");
+            peçaj2.setAttribute("draggable", "false");
+        }
+        openEnd();
+    }
+
+    end_of_game(){
+        for(var i=0; i<num_peças; i++){
+            const peçaj1 = document.getElementById("j1" + (i + 1));
+            const peçaj2 = document.getElementById("j2" + (i + 1));
+            peçaj1.setAttribute("draggable", "false");
+            peçaj2.setAttribute("draggable", "false");
+        }
+
     }
 }
 
@@ -491,6 +538,24 @@ function openInstruction() {
 function closeInstruction() {
     var instruction = document.getElementById("instruções");
     instruction.style.display = 'none';
+}
+
+function openEnd(){
+    var fim = document.getElementById("fim");
+    fim.style.display = 'flex';
+}
+
+function closeEnd() {
+    var fim = document.getElementById("fim");
+    fim.style.display = 'none';
+}
+
+function mensagem(text) {
+    document.getElementById('mensagens').innerText = text;
+}
+
+function fim_mensagem(text) {
+    document.getElementById('fim_inner').innerText = text;
 }
 
 function allowDrop(ev) {
@@ -525,6 +590,8 @@ function drop(ev) {
                 mensagem('Movimento efetuado com sucesso!');
                 if (!game.piece_to_remove) { //increase jogadas if there is no pieces to remove, else waits until the piece is removed
                     game.jogadas++;
+                } else {
+                    mensagem('Tem de remover uma peça do adversário.');
                 }
             } else if (data.substring(0,2) != game.vez()){
                 mensagem("Espere pela sua vez!");
@@ -532,23 +599,21 @@ function drop(ev) {
                 mensagem("Movimento inválido!");
             }
         } else {
-
             if (data.substring(0,2) == 'j1') {var fora = 'fora2';} else {var fora = 'fora1';} 
             if (alvoId.substring(0,5) == fora){ //sees if the piece was moved to the right place
                 if (game.remover_peça(data)) { //sees if this piece can be removed
                     ev.target.appendChild(document.getElementById(data));
                     game.jogadas++; //increase jogadas because before we didnt
                     mensagem("Peça removida com sucesso!");
+                    if(game.game_finished()){
+                        game.end_of_game();
+                    }
                 }
             } else {
                 mensagem("Tem de retirar uma peça do adversário para o seu espaço");
             }
         }
     }
-}
-
-function mensagem(text) {
-    document.getElementById('mensagens').innerText = text;
 }
 
 var game = new Game();

@@ -10,6 +10,10 @@
 <body>
     
     <div class="everything">
+        <div id="fim">
+                <div id="fim_inner"></div> <br>
+                <div><button id="closeFim" onclick="closeEnd()"> OK </button></div>
+            </div>
 
         <div id="instruções"> <!-- bloco escondido enquanto não carrego no botaõ -->
             <span class="fechar" onclick="closeInstruction()">X</span> <!-- o botão para fehcar as isntruções -->
@@ -35,7 +39,10 @@
             <img src="smile.png">
         </div>
 
+        
+
         <div class = "main">
+
             <div class="above_tab">
                 <button onclick="game.restore(document.getElementById('cor').value)">Reiniciar Jogo</button>
                 <button onclick="openInstruction()">Visualizar Instruções</button>
@@ -52,7 +59,7 @@
                     Aqui irão aparecer as mensagens!
             </div>
             <div class="below_tab">
-                <button>Desistir Jogo</button>
+                <button onclick="game.desistir()">Desistir Jogo</button>
                 <button>Vizualizar Classificações</button>
             </div>   
         </div>
