@@ -1,12 +1,10 @@
 const num_peças =12 ;
-
 //https://www.youtube.com/watch?v=k1kC8b6t2kg
-
 
 class Tabuleiro{
 	constructor(linhas,colunas){
-		this.linhas = linhas;
-		this.colunas = colunas;
+		this.colunas = linhas;
+		this.linhas = colunas;
 		this.tabuleiro1 = new Array();
 		this.limpar_tabuleiro();
 		this.criar_tabuleiro();
@@ -29,10 +27,8 @@ class Tabuleiro{
 				bloco.setAttribute("ondrop", "drop(event)"); 
                 bloco.setAttribute("ondragover", "allowDrop(event)");
 				tab.appendChild(bloco);
-                this.tabuleiro1[linha][coluna] = new Array();
-				this.tabuleiro1[linha][coluna]['jogador'] = undefined;
-                this.tabuleiro1[linha][coluna]['numero'] = undefined;
-                
+
+				this.tabuleiro1[linha][coluna] = undefined;
 			}
 		}
 	}
@@ -77,35 +73,17 @@ class Fora {
 }
 
 class Game {
-
-    constructor(linhas, colunas, j1, j2) {
-
-        j1 = "black";
-        j2 = "white";
-        
-        this.linhas = linhas;
-        this.colunas = colunas;
-
-        this.tabuleiro_desenho = new Tabuleiro(this.linhas,this.colunas);
-        this.fora_j1 = new Fora(true);
-        this.fora_j2 = new Fora(false);
-
-        var r = document.querySelector(':root');
-        r.style.setProperty('--j1', j1);
-        r.style.setProperty('--j2', j2);
-		
-        this.tabuleiro = this.tabuleiro_desenho.tabuleiro1;
-        this.jogadas = 0;
-        this.fase = 1;
-        this.peça_a_remover = false;
+    constructor(j1, j2) {
+        this.restore(j1,j2);
     }
 
-    regenerate(linhas, colunas, j1, j2) {
-        
+    restore (j1, j2) {
         if (j1 === undefined && j2 === undefined) {
 			j1 = "black";
             j2 = "white";
-        } else if (j1 === 'Preto') {
+        }
+
+        if (j1 === 'Preto') {
             j1 = "black";
             j2 = "white";
         } else if (j1 === 'Branco') {
@@ -113,10 +91,11 @@ class Game {
             j2 = "black";
         }
 
-        this.linhas = linhas;
-        this.colunas = colunas;
+		this.colunas = parseInt(document.getElementById('comprimento').value);
+		this.linhas = parseInt(document.getElementById('altura').value);
 
-        this.tabuleiro_desenho = new Tabuleiro(this.linhas,this.colunas);
+        this.current = j1;
+        this.tabuleiro_desenho = new Tabuleiro(this.colunas,this.linhas);
         this.fora_j1 = new Fora(true);
         this.fora_j2 = new Fora(false);
 
@@ -127,90 +106,94 @@ class Game {
         this.tabuleiro = this.tabuleiro_desenho.tabuleiro1;
         this.jogadas = 0;
         this.fase = 1;
-        this.peça_a_remover = false;
+        this.piece_to_remove = false;
+        this.last_posj1 = new Array(2);
+        this.last_posj2 = new Array(2);
     }
 
-    //não principais
-    vez() { //verifica quem tem a vez de jogar
+    //non-main
+
+    vez() { //checks how has to play
         if (this.jogadas % 2 == 0) {return 'j1';}
         else {return 'j2';}
     }
 
-    mudança() { //deteta o fim da fase 1 e faz as mudanças necessárias para avançar para a fase 2
+    mudança() { //detects the end of phase 1
         for(var i=0; i<num_peças; i++){
             const peçaj1 = document.getElementById("j1" + (i + 1));
             const peçaj2 = document.getElementById("j2" + (i + 1));
+            const fora1 = document.getElementById('fora1');
+            const fora2 = document.getElementById('fora2');
             peçaj1.setAttribute("draggable", "true");
             peçaj2.setAttribute("draggable", "true");
         }
-        this.fase++; //mudança de fase
+        const fora1 = document.getElementById('fora1');
+        const fora2 = document.getElementById('fora2');
+        fora1.setAttribute("ondrop", "drop(event)"); 
+        fora1.setAttribute("ondragover", "allowDrop(event)");
+        fora2.setAttribute("ondrop", "drop(event)"); 
+        fora2.setAttribute("ondragover", "allowDrop(event)");
+        console.log('fase 2');
+        this.fase++;
     }
     
-    fez_linha(jogador, linha, coluna) { 
-        let check = false;
+    fez_linha(jogador, linha, coluna) { //checks if the player made a line
         //avaliar linhas horizontais
         if (coluna <= this.colunas - 2) { //avalia linha para a frente _b
-            if (this.tabuleiro[linha][coluna]['cor'] == jogador && this.tabuleiro[linha][coluna + 1]['cor'] == jogador && this.tabuleiro[linha][coluna + 2]['cor'] == jogador) {
-                check = true;
+            if (this.tabuleiro[linha][coluna] == jogador && this.tabuleiro[linha][coluna + 1] == jogador && this.tabuleiro[linha][coluna + 2] == jogador) {
+                return true;
             }
         }
         if (coluna >= 3) { //avalia linha para tras bb_
-            if (this.tabuleiro[linha][coluna]['cor'] == jogador && this.tabuleiro[linha][coluna - 1]['cor'] == jogador && this.tabuleiro[linha][coluna - 2]['cor'] == jogador) {
-                check = true;
+            if (this.tabuleiro[linha][coluna] == jogador && this.tabuleiro[linha][coluna - 1] == jogador && this.tabuleiro[linha][coluna - 2] == jogador) {
+                return true;
             }
         }
-        if (coluna > 1 && coluna < this.colunas) { //avalia linha b_b
-            if (this.tabuleiro[linha][coluna - 1]['cor'] == jogador && this.tabuleiro[linha][coluna]['cor'] == jogador && this.tabuleiro[linha][coluna + 1]['cor'] == jogador) {
-                check = true;
+        if (coluna > 1 || coluna < this.colunas) { //avalia linha b_b
+            if (this.tabuleiro[linha][coluna - 1] == jogador && this.tabuleiro[linha][coluna] == jogador && this.tabuleiro[linha][coluna + 1] == jogador) {
+                return true;
             }
         }
 
         //avaliar linhas verticais
         if (linha <= this.linhas - 2) { //avalia linha para baixo
-            if (this.tabuleiro[linha][coluna]['cor'] == jogador && this.tabuleiro[linha + 1][coluna]['cor'] == jogador && this.tabuleiro[linha + 2][coluna]['cor'] == jogador) {
-                check = true;
+            if (this.tabuleiro[linha][coluna] == jogador && this.tabuleiro[linha + 1][coluna] == jogador && this.tabuleiro[linha + 2][coluna] == jogador) {
+                return true;
             }
         }
         if (linha >= 3) { //avalia linha para cima
-            if (this.tabuleiro[linha][coluna]['cor'] == jogador && this.tabuleiro[linha - 1][coluna]['cor'] == jogador && this.tabuleiro[linha - 2][coluna]['cor'] == jogador) {
-                check = true;
+            if (this.tabuleiro[linha][coluna] == jogador && this.tabuleiro[linha - 1][coluna] == jogador && this.tabuleiro[linha - 2][coluna] == jogador) {
+                return true;
             }
         }
         if (linha > 1 && linha < this.linhas) { //avalia b_b na vertical
-            if (this.tabuleiro[linha - 1][coluna]['cor'] == jogador && this.tabuleiro[linha][coluna]['cor'] == jogador && this.tabuleiro[linha + 1][coluna]['cor'] == jogador) {
-                check = true;
+            if (this.tabuleiro[linha - 1][coluna] == jogador && this.tabuleiro[linha][coluna] == jogador && this.tabuleiro[linha + 1][coluna] == jogador) {
+                return true;
             }
         }
-        return check
+
+        return false;
     }
 
-    search(jogador, numero) {
-        for(var linha = 1; linha<=this.linhas; linha++) {
-			for(var coluna = 1; coluna<=this.colunas; coluna++) {
-                if (this.tabuleiro[linha][coluna]['jogador'] == jogador && this.tabuleiro[linha][coluna]['numero'] == numero) {
-                    return linha.toString() + coluna.toString();
-                } else {
-                    return ;
-                }
-            }
-        }
-    }
+    //main
 
-    //principais
+    //phase 1
 
     colocar_peça(peçaId, alvoId) {
         const linha = parseInt(alvoId.substring(1, 2)); //obtem a linha do bloco em causa
         const coluna = parseInt(alvoId.substring(2, 3)); //obtem a coluna do bloco em causa
 		const jogador = peçaId.substring(0,2); //obtem o jogador a quem pertence a peça
-        const numero = peçaId.substring(2);
         const peça = document.getElementById(peçaId);
 
         if(peça.draggable && jogador == this.vez()){ //se a peça não estiver no tabuleiro e for a vez do jogador
 		    if(this.possivel_colocar(jogador,linha,coluna)){ //jogada válida
-                this.tabuleiro[linha][coluna]['cor'] = jogador; //coloca a peça no array tabuleiro
-                this.tabuleiro[linha][coluna]['numero'] = numero;
+                this.tabuleiro[linha][coluna] = jogador; //coloca a peça no array tabuleiro
+                if(jogador == 'j1'){ 
+                    this.linhas_j1 += this.fez_linha(jogador, linha, coluna);
+                } else {
+                    this.linhas_j2 += this.fez_linha(jogador, linha, coluna);
+                }
                 peça.draggable = false; //bloqueia a peça durnte a fase 1 após ser colocada no tabuleiro
-
                 return true;
             } else { //jogada inválida
                 mensagem('Movimento inválido');
@@ -225,53 +208,53 @@ class Game {
         return false;
     }
 
-	possivel_colocar(jogador,linha, coluna) {
-		if (this.tabuleiro[linha][coluna]['cor'] != 'j1' && this.tabuleiro[linha][coluna]['cor'] != 'j2') {
+	possivel_colocar(jogador, linha, coluna) {
+		if (this.tabuleiro[linha][coluna] != 'j1' && this.tabuleiro[linha][coluna] != 'j2') {
 			if (coluna <= this.colunas - 3) { //avalia linha para a frente
-				if (this.tabuleiro[linha][coluna + 1]['cor'] == jogador && this.tabuleiro[linha][coluna + 2]['cor'] == jogador && this.tabuleiro[linha][coluna + 3]['cor'] == jogador) {
+				if (this.tabuleiro[linha][coluna + 1] == jogador && this.tabuleiro[linha][coluna + 2] == jogador && this.tabuleiro[linha][coluna + 3] == jogador) {
 					return false;
 				}
 			}
 	
 			if (coluna >= 4) { //avalia linha para tras
-				if (this.tabuleiro[linha][coluna - 1]['cor'] == jogador && this.tabuleiro[linha][coluna - 2]['cor'] == jogador && this.tabuleiro[linha][coluna - 3]['cor'] == jogador) {
+				if (this.tabuleiro[linha][coluna - 1] == jogador && this.tabuleiro[linha][coluna - 2] == jogador && this.tabuleiro[linha][coluna - 3] == jogador) {
 					return false;
 				}
 			}
 	
 	
 			if (linha <= this.linhas - 3) { //avalia linha para baixo
-				if (this.tabuleiro[linha + 1][coluna]['cor'] == jogador && this.tabuleiro[linha + 2][coluna]['cor'] == jogador && this.tabuleiro[linha + 3][coluna]['cor'] == jogador) {
+				if (this.tabuleiro[linha + 1][coluna] == jogador && this.tabuleiro[linha + 2][coluna] == jogador && this.tabuleiro[linha + 3][coluna] == jogador) {
 					return false;
 				}
 			}
 	
 			if (linha >= 4) { //avalia linha para cima
-				if (this.tabuleiro[linha - 1][coluna]['cor'] == jogador && this.tabuleiro[linha - 2][coluna]['cor'] == jogador && this.tabuleiro[linha - 3][coluna]['cor'] == jogador) {
+				if (this.tabuleiro[linha - 1][coluna] == jogador && this.tabuleiro[linha - 2][coluna] == jogador && this.tabuleiro[linha - 3][coluna] == jogador) {
 					return false;
 				}
 			}
 
             if (coluna > 1 && coluna <= this.colunas - 2) { //avalia situações do tipo b_bb
-                if (this.tabuleiro[linha][coluna + 1]['cor'] == jogador && this.tabuleiro[linha][coluna + 2]['cor'] == jogador && this.tabuleiro[linha][coluna - 1]['cor'] == jogador){
+                if (this.tabuleiro[linha][coluna + 1] == jogador && this.tabuleiro[linha][coluna + 2] == jogador && this.tabuleiro[linha][coluna - 1] == jogador){
                     return false;
                 }
             }
 
             if (coluna > 2 && coluna <= this.colunas - 1) { //avalia situações do tipo bb_b
-                if (this.tabuleiro[linha][coluna + 1]['cor'] == jogador && this.tabuleiro[linha][coluna - 2]['cor'] == jogador && this.tabuleiro[linha][coluna - 1]['cor'] == jogador){
+                if (this.tabuleiro[linha][coluna + 1] == jogador && this.tabuleiro[linha][coluna - 2] == jogador && this.tabuleiro[linha][coluna - 1] == jogador){
                     return false;
                 } 
             }
 
             if (linha > 1 && linha <= this.linhas - 2) { //avalia situações do tipo b_bb em coluna
-                if (this.tabuleiro[linha + 1][coluna]['cor'] == jogador && this.tabuleiro[linha + 2][coluna]['cor'] == jogador && this.tabuleiro[linha - 1][coluna]['cor'] == jogador) {
+                if (this.tabuleiro[linha + 1][coluna] == jogador && this.tabuleiro[linha + 2][coluna] == jogador && this.tabuleiro[linha - 1][coluna] == jogador) {
                     return false;
                 } 
             }
             
             if (linha > 2 && linha <= this.linhas -1) { //avalia situações do tipo bb_b em coluna
-                if (this.tabuleiro[linha + 1][coluna]['cor'] == jogador && this.tabuleiro[linha - 2][coluna]['cor'] == jogador && this.tabuleiro[linha - 1][coluna]['cor'] == jogador){ 
+                if (this.tabuleiro[linha + 1][coluna] == jogador && this.tabuleiro[linha - 2][coluna] == jogador && this.tabuleiro[linha - 1][coluna] == jogador){ 
                     return false;
                 }
             }
@@ -280,7 +263,9 @@ class Game {
 		}
 		return false;
 	}
-//-----------------------------------------------------------------------------------------------
+
+    //phase 2
+
     mover_peça(peçaId, alvoId) {
         const linha = parseInt(alvoId.substring(1, 2)); //obtem a linha do bloco em causa
         const coluna = parseInt(alvoId.substring(2, 3)); //obtem a coluna do bloco em causa
@@ -290,43 +275,58 @@ class Game {
         const originalBlock = document.getElementById(peçaId).parentNode; // original block of the piece
         const originalLine = parseInt(originalBlock.id.substring(1,2)); // original line of that block
         const originalColumn = parseInt(originalBlock.id.substring(2,3)); // original column of that block
-        if(!this.peça_a_remover) {
-            if(jogador == this.vez()) {
-                if(this.possivel_mover(jogador, linha, coluna, originalLine, originalColumn)) {
+        
+        console.log(this.last_posj1, this.last_posj2, alvoId, peçaId);
 
-                    this.tabuleiro[originalLine][originalColumn] = undefined; //remove a peça da posição original
-                    this.tabuleiro[linha][coluna]['cor'] = jogador; //coloca a peça na nova posição
+        //checks if the piece is being moved to the last pos. that it was at
+        if (jogador == 'j1' && this.last_posj1[0] == peçaId && this.last_posj1[1] == alvoId) {return false;}
+        if (jogador == 'j2' && this.last_posj2[0] == peçaId && this.last_posj2[1] == alvoId) {return false;}
 
-                    if(!this.fez_linha(jogador, linha, coluna)){
-                        this.jogadas++;
-                        return true;
-                    }
-                    
-                    this.peça_a_remover = true;
-                    return true;
-
+        if (jogador == this.vez()) {
+            if (this.possivel_mover(jogador, linha, coluna, originalLine, originalColumn)) {
+                this.tabuleiro[originalLine][originalColumn] = undefined; //removes the piece from the board
+                this.tabuleiro[linha][coluna] = jogador; //place the piece in the new pos. in the board
+                this.piece_to_remove = this.fez_linha(jogador, linha, coluna); 
+                
+                //save the last piece that was moved and the original pos
+                if (jogador == 'j1') {
+                    this.last_posj1[0] = peçaId;
+                    this.last_posj1[1] = originalBlock.id;
                 } else {
-                    mensagem('Movimento inválido');
+                    this.last_posj2[0] = peçaId;
+                    this.last_posj2[1] = originalBlock.id;
                 }
-            } else {
-                mensagem('Espere pela sua vez!');
+
+                return true;
+                 
             }
-        }
+        } 
+
         return false;
     }
 
-    // This can probaly be subsumed into possivel_colocar to streamline
-    // Identical except this one skips checking [originalLine][originalColumn]
-
     possivel_mover(jogador, linha, coluna, originalLine, originalColumn){
-        if (this.tabuleiro[linha][coluna]['cor'] != 'j1' && this.tabuleiro[linha][coluna]['cor'] != 'j2') {
+        if (coluna != originalColumn){
+            if (coluna != originalColumn -1 && coluna != originalColumn + 1){
+                return false;
+            }
+
+            if (linha != originalLine){
+                return false;
+            }
+        } else if ( linha != originalLine - 1 && linha != originalLine + 1 ){
+            return false;
+        }
+
+
+        if (this.tabuleiro[linha][coluna] != 'j1' && this.tabuleiro[linha][coluna] != 'j2') {
 			if (coluna <= this.colunas - 3) { //avalia linha para a frente
                 let check = true;
                 for (let i=1; i<=3; i++){
                     let checkLine = linha;
                     let checkColumn = coluna + i;
 
-                    check &&= (originalLine != checkLine && originalColumn != checkColumn && this.tabuleiro[checkLine][checkColumn] == jogador);
+                    check &&= ( !(originalLine == checkLine && originalColumn == checkColumn) && this.tabuleiro[checkLine][checkColumn] == jogador);
                 }
 
                 if (check) {
@@ -334,46 +334,132 @@ class Game {
                 }
 			}
             
-            // TODO: rest of the checks
 			if (coluna >= 4) { //avalia linha para tras
-				if (this.tabuleiro[linha][coluna - 1]['cor'] == jogador && this.tabuleiro[linha][coluna - 2]['cor'] == jogador && this.tabuleiro[linha][coluna - 3]['cor'] == jogador) {
-					return false;
-				}
+
+                let check = true;
+                for (let i=1; i<=3; i++){
+                    let checkLine = linha;
+                    let checkColumn = coluna - i;
+
+                    check &&= ( !(originalLine == checkLine && originalColumn == checkColumn) && this.tabuleiro[checkLine][checkColumn] == jogador);
+                }
+
+                if (check) {
+                    return false;
+                }
 			}
 	
 	
 			if (linha <= this.linhas - 3) { //avalia linha para baixo
-				if (this.tabuleiro[linha + 1][coluna]['cor'] == jogador && this.tabuleiro[linha + 2][coluna]['cor'] == jogador && this.tabuleiro[linha + 3][coluna]['cor'] == jogador) {
-					return false;
-				}
+
+                let check = true;
+                for (let i=1; i<=3; i++){
+                    let checkLine = linha + i;
+                    let checkColumn = coluna;
+
+                    check &&= ( !(originalLine == checkLine && originalColumn == checkColumn) && this.tabuleiro[checkLine][checkColumn] == jogador);
+                }
+
+                if (check) {
+                    return false;
+                }
 			}
 	
 			if (linha >= 4) { //avalia linha para cima
-				if (this.tabuleiro[linha - 1][coluna]['cor'] == jogador && this.tabuleiro[linha - 2][coluna]['cor'] == jogador && this.tabuleiro[linha - 3][coluna]['cor'] == jogador) {
-					return false;
-				}
+
+                let check = true;
+                for (let i=1; i<=3; i++){
+                    let checkLine = linha - i;
+                    let checkColumn = coluna;
+
+                    check &&= ( !(originalLine == checkLine && originalColumn == checkColumn) && this.tabuleiro[checkLine][checkColumn] == jogador);
+                }
+
+                if (check) {
+                    return false;
+                }
 			}
 
             if (coluna > 1 && coluna <= this.colunas - 2) { //avalia situações do tipo b_bb
-                if (this.tabuleiro[linha][coluna + 1]['cor'] == jogador && this.tabuleiro[linha][coluna + 2]['cor'] == jogador && this.tabuleiro[linha][coluna - 1]['cor'] == jogador){
+
+                let check = true;
+                for (let i=1; i<=2; i++){
+                    let checkLine = linha;
+                    let checkColumn = coluna + i;
+
+                    check &&= ( !(originalLine == checkLine && originalColumn == checkColumn) && this.tabuleiro[checkLine][checkColumn] == jogador);
+                }
+                {
+                    let checkLine = linha;
+                    let checkColumn = coluna - 1;
+
+                    check &&= ( !(originalLine == checkLine && originalColumn == checkColumn) && this.tabuleiro[checkLine][checkColumn] == jogador);
+                }
+
+                if (check) {
                     return false;
                 }
             }
 
             if (coluna > 2 && coluna <= this.colunas - 1) { //avalia situações do tipo bb_b
-                if (this.tabuleiro[linha][coluna + 1]['cor'] == jogador && this.tabuleiro[linha][coluna - 2]['cor'] == jogador && this.tabuleiro[linha][coluna - 1]['cor'] == jogador){
+
+                let check = true;
+                for (let i=1; i<=2; i++){
+                    let checkLine = linha;
+                    let checkColumn = coluna - i;
+
+                    check &&= ( !(originalLine == checkLine && originalColumn == checkColumn) && this.tabuleiro[checkLine][checkColumn] == jogador);
+                }
+                {
+                    let checkLine = linha;
+                    let checkColumn = coluna + 1;
+
+                    check &&= ( !(originalLine == checkLine && originalColumn == checkColumn) && this.tabuleiro[checkLine][checkColumn] == jogador);
+                }
+
+                if (check) {
                     return false;
-                } 
+                }
             }
 
             if (linha > 1 && linha <= this.linhas - 2) { //avalia situações do tipo b_bb em coluna
-                if (this.tabuleiro[linha + 1][coluna]['cor'] == jogador && this.tabuleiro[linha + 2][coluna]['cor'] == jogador && this.tabuleiro[linha - 1][coluna]['cor'] == jogador) {
+
+                let check = true;
+                for (let i=1; i<=2; i++){
+                    let checkLine = linha + i;
+                    let checkColumn = coluna;
+
+                    check &&= ( !(originalLine == checkLine && originalColumn == checkColumn) && this.tabuleiro[checkLine][checkColumn] == jogador);
+                }
+                {
+                    let checkLine = linha - 1;
+                    let checkColumn = coluna;
+
+                    check &&= ( !(originalLine == checkLine && originalColumn == checkColumn) && this.tabuleiro[checkLine][checkColumn] == jogador);
+                }
+
+                if (check) {
                     return false;
-                } 
+                }
             }
             
             if (linha > 2 && linha <= this.linhas -1) { //avalia situações do tipo bb_b em coluna
-                if (this.tabuleiro[linha + 1][coluna]['cor'] == jogador && this.tabuleiro[linha - 2][coluna]['cor'] == jogador && this.tabuleiro[linha - 1][coluna]['cor'] == jogador){ 
+
+                let check = true;
+                for (let i=1; i<=2; i++){
+                    let checkLine = linha - i;
+                    let checkColumn = coluna;
+
+                    check &&= ( !(originalLine == checkLine && originalColumn == checkColumn) && this.tabuleiro[checkLine][checkColumn] == jogador);
+                }
+                {
+                    let checkLine = linha + 1;
+                    let checkColumn = coluna;
+
+                    check &&= ( !(originalLine == checkLine && originalColumn == checkColumn) && this.tabuleiro[checkLine][checkColumn] == jogador);
+                }
+
+                if (check) {
                     return false;
                 }
             }
@@ -383,17 +469,16 @@ class Game {
 		return false;
     }
 
-
-
-    remover_peça(peçaId, blocoId) {
-        //if (this.peça_a_remover && this.vez() != peçaId.substring(0,2)) {
-            const linha = blocoId.substring(1,2);
-            const coluna = blocoId.substring(2,3);
-            this.tabuleiro[linha][coluna]['cor'] = undefined;
-            this.peça_a_remover = false;
-            this.jogadas++;
+    remover_peça(peçaId) {
+        const bloco = document.getElementById(peçaId).parentNode;
+        const linha = parseInt(bloco.id.substring(1,2));
+        const coluna = parseInt(bloco.id.substring(2,3));
+        const peça_removida = peçaId.substring(0,2);
+        if (peça_removida != this.vez()) {
+            this.tabuleiro[linha][coluna] = undefined;
+            this.piece_to_remove = false;
             return true;
-        //}
+        }
         return false;
     }
 }
@@ -417,35 +502,48 @@ function drag(ev) {
 }
 
 function drop(ev) {
-    ev.preventDefault(); // Prevent the default action of the element
+    ev.preventDefault(); 
     var data = ev.dataTransfer.getData("text");
     var alvoId = ev.target.id;
-    if(game.fase == 1) { //fase 1
-        if (alvoId.substring(0,1) != "j" && game.colocar_peça(data, alvoId)){ //única maneira que consegui de evitar que uma peça seja movida para dentro da mesma peça
+    if(game.jogadas < 2*num_peças) { //phase 1
+        if (alvoId.substring(0,1) != "j" && game.colocar_peça(data, alvoId)){
             ev.target.appendChild(document.getElementById(data));
             mensagem('Movimento efetuado com sucesso!');
             game.jogadas++;
             if(game.jogadas == 2*num_peças) {
-                    game.mudança();
+                game.mudança();
             }
-            console.log(game.jogadas);
         }  
-    } else { //fase 2
+    } else { //phase 2
 
-        // TODO: movement to adjacent blocks only
-        // TODO: removal of pieces
-        const blocoId = 'b' + game.search(data.substring(0,2), data.substring(2));
-        //if (game.peça_a_remover && game.remover_peça(data, blocoId)) {
-            if (alvoId.substring(0,4) == 'fora') {
-                ev.target.appendChild(document.getElementById(data)); //already works
+        
+
+        if (!game.piece_to_remove){
+
+            if (alvoId.substring(0,1) == "b" && game.mover_peça(data, alvoId)) {
+                ev.target.appendChild(document.getElementById(data));
+                mensagem('Movimento efetuado com sucesso!');
+                if (!game.piece_to_remove) { //increase jogadas if there is no pieces to remove, else waits until the piece is removed
+                    game.jogadas++;
+                }
+            } else if (data.substring(0,2) != game.vez()){
+                mensagem("Espere pela sua vez!");
+            } else {
+                mensagem("Movimento inválido!");
             }
-        //}
-        //else if (alvoId.substring(0,1) != "j" && game.mover_peça(data, alvoId)) {
-            //if (alvoId.substring(0,1) == 'b') {
-              //  ev.target.appendChild(document.getElementById(data));
-                //mensagem('Movimento efetuado com sucesso!');
-            //}
-        //}
+        } else {
+
+            if (data.substring(0,2) == 'j1') {var fora = 'fora2';} else {var fora = 'fora1';} 
+            if (alvoId.substring(0,5) == fora){ //sees if the piece was moved to the right place
+                if (game.remover_peça(data)) { //sees if this piece can be removed
+                    ev.target.appendChild(document.getElementById(data));
+                    game.jogadas++; //increase jogadas because before we didnt
+                    mensagem("Peça removida com sucesso!");
+                }
+            } else {
+                mensagem("Tem de retirar uma peça do adversário para o seu espaço");
+            }
+        }
     }
 }
 
@@ -453,4 +551,4 @@ function mensagem(text) {
     document.getElementById('mensagens').innerText = text;
 }
 
-var game = new Game(parseInt(document.getElementById('altura').value), parseInt(document.getElementById('comprimento').value), document.getElementById('cor').value);
+var game = new Game();
