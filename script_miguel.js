@@ -1,6 +1,78 @@
 const num_peças =12 ;
 //https://www.youtube.com/watch?v=k1kC8b6t2kg
 
+// Game AI
+
+class gameAI {
+    constructor(){};
+
+    nextStep( tabuleiro, fase ){
+        if ( fase==1 ){
+            // Choose a spot to move a piece to
+            // Calculate available spots
+            let spots = new Array();
+
+            for (let i=1; i<tabuleiro.length; i++){
+                for (let j=1; j<tabuleiro[i].length; j++){
+                    if (game.possivel_colocar("j2",i,j)) spots.push(""+i+j);
+                }
+            }
+
+            // Choose randomly
+
+            let choice = Math.floor( Math.random()*spots.length);
+            let chosenSpot = "b"+spots[choice];
+            let currentPiece = "j2"+Math.floor((game.jogadas+1)/2);
+            console.log(spots.length)
+            console.log(choice);
+
+            // Move a piece there
+
+            // There should be a function to directly move pieces
+
+            if ( game.colocar_peça( currentPiece, chosenSpot)){
+                document.getElementById( chosenSpot ).appendChild( document.getElementById(currentPiece) );
+            }else{ console.log("oops"); }
+        
+        }else{
+            // List all the pieces and all their possible movements
+
+            // WARNING: the possivel_mover function does not check that
+            // the movement is not the last position
+            // Check here
+
+            // WARNING: pieces are numbered from 1 to num_peças instead of from 0 to num_peças
+
+            let piecesMovements = new Array();
+            for (let i=0; i<num_peças; i++){
+                piecesMovements[i] = new Array();
+
+                let currentPiece = "j2"+(i+1);
+                let currentBlock = document.getElementById(currentPiece).parentNode;
+                console.log(currentBlock);
+                console.log(currentPiece);
+                let currentLine = parseInt(currentBlock.id.substring(1,2));
+                let currentColumn = parseInt(currentBlock.id.substring(2,3));
+
+                for (let j=0; j<4; j++){
+
+                    // Generate positions in a loop?
+
+                    // Check last_pos here
+
+                    if (game.possivel_mover("j2", currentLine+1, currentColumn, currentLine, currentColumn)){
+
+                    }
+                }
+            }
+
+            // Choose randomly
+
+            // Move the piece
+        }
+    }
+}
+
 class Tabuleiro{
 	constructor(linhas,colunas){
 		this.colunas = linhas;
@@ -98,25 +170,35 @@ class Game {
         this.tabuleiro_desenho = new Tabuleiro(this.colunas,this.linhas);
         this.fora_j1 = new Fora(true);
         this.fora_j2 = new Fora(false);
+        this.peças_j1 = num_peças;
+        this.peças_j2 = num_peças;
 
         var r = document.querySelector(':root');
         r.style.setProperty('--j1', j1);
         r.style.setProperty('--j2', j2);
 		
         this.tabuleiro = this.tabuleiro_desenho.tabuleiro1;
-        this.linhas_j1 = 0;
-        this.linhas_j2 = 0;
         this.jogadas = 0;
         this.fase = 1;
+        this.piece_to_remove = false;
+        this.last_posj1 = new Array(2);
+        this.last_posj2 = new Array(2);
+
+        if (document.getElementById("ia").checked){
+            this.againstAI = true;
+            this.GameAI = new gameAI();
+        }
+        else { this.againstAI = false; }
     }
 
-    //não principais
-    vez() { //verifica quem tem a vez de jogar
+    //non-main
+
+    vez() { //checks how has to play
         if (this.jogadas % 2 == 0) {return 'j1';}
         else {return 'j2';}
     }
 
-    mudança() { //deteta o fim da fase 1 e faz as mudanças necessárias para avançar para a fase 2
+    mudança() { //detects the end of phase 1
         for(var i=0; i<num_peças; i++){
             const peçaj1 = document.getElementById("j1" + (i + 1));
             const peçaj2 = document.getElementById("j2" + (i + 1));
@@ -135,46 +217,47 @@ class Game {
         this.fase++;
     }
     
-    fez_linha(jogador, linha, coluna) {
-        var count = 0;
+    fez_linha(jogador, linha, coluna) { //checks if the player made a line
         //avaliar linhas horizontais
         if (coluna <= this.colunas - 2) { //avalia linha para a frente _b
             if (this.tabuleiro[linha][coluna] == jogador && this.tabuleiro[linha][coluna + 1] == jogador && this.tabuleiro[linha][coluna + 2] == jogador) {
-                count++;
+                return true;
             }
         }
         if (coluna >= 3) { //avalia linha para tras bb_
             if (this.tabuleiro[linha][coluna] == jogador && this.tabuleiro[linha][coluna - 1] == jogador && this.tabuleiro[linha][coluna - 2] == jogador) {
-                count++;
+                return true;
             }
         }
         if (coluna > 1 || coluna < this.colunas) { //avalia linha b_b
             if (this.tabuleiro[linha][coluna - 1] == jogador && this.tabuleiro[linha][coluna] == jogador && this.tabuleiro[linha][coluna + 1] == jogador) {
-                count++;
+                return true;
             }
         }
 
         //avaliar linhas verticais
         if (linha <= this.linhas - 2) { //avalia linha para baixo
             if (this.tabuleiro[linha][coluna] == jogador && this.tabuleiro[linha + 1][coluna] == jogador && this.tabuleiro[linha + 2][coluna] == jogador) {
-                count++;
+                return true;
             }
         }
         if (linha >= 3) { //avalia linha para cima
             if (this.tabuleiro[linha][coluna] == jogador && this.tabuleiro[linha - 1][coluna] == jogador && this.tabuleiro[linha - 2][coluna] == jogador) {
-                count++;
+                return true;
             }
         }
         if (linha > 1 && linha < this.linhas) { //avalia b_b na vertical
             if (this.tabuleiro[linha - 1][coluna] == jogador && this.tabuleiro[linha][coluna] == jogador && this.tabuleiro[linha + 1][coluna] == jogador) {
-                count++;
+                return true;
             }
         }
 
-        return count;
+        return false;
     }
 
-    //principais
+    //main
+
+    //phase 1
 
     colocar_peça(peçaId, alvoId) {
         const linha = parseInt(alvoId.substring(1, 2)); //obtem a linha do bloco em causa
@@ -191,7 +274,6 @@ class Game {
                     this.linhas_j2 += this.fez_linha(jogador, linha, coluna);
                 }
                 peça.draggable = false; //bloqueia a peça durnte a fase 1 após ser colocada no tabuleiro
-                console.log(this.linhas_j1, this.linhas_j2);
                 return true;
             } else { //jogada inválida
                 mensagem('Movimento inválido');
@@ -206,7 +288,7 @@ class Game {
         return false;
     }
 
-	possivel_colocar(jogador,linha, coluna) {
+	possivel_colocar(jogador, linha, coluna) {
 		if (this.tabuleiro[linha][coluna] != 'j1' && this.tabuleiro[linha][coluna] != 'j2') {
 			if (coluna <= this.colunas - 3) { //avalia linha para a frente
 				if (this.tabuleiro[linha][coluna + 1] == jogador && this.tabuleiro[linha][coluna + 2] == jogador && this.tabuleiro[linha][coluna + 3] == jogador) {
@@ -262,6 +344,8 @@ class Game {
 		return false;
 	}
 
+    //phase 2
+
     mover_peça(peçaId, alvoId) {
         const linha = parseInt(alvoId.substring(1, 2)); //obtem a linha do bloco em causa
         const coluna = parseInt(alvoId.substring(2, 3)); //obtem a coluna do bloco em causa
@@ -272,28 +356,31 @@ class Game {
         const originalLine = parseInt(originalBlock.id.substring(1,2)); // original line of that block
         const originalColumn = parseInt(originalBlock.id.substring(2,3)); // original column of that block
         
-        if(jogador == this.vez()) {
-            if(this.possivel_mover(jogador, linha, coluna, originalLine, originalColumn)) {
-                // retira a peça do array tabuleiro
-                this.tabuleiro[originalLine][originalColumn] = undefined;
-                
-                this.tabuleiro[linha][coluna] = jogador; //coloca a peça no array tabuleiro
-                
-                if(jogador == 'j1'){ 
-                    this.linhas_j1 += this.fez_linha(jogador, linha, coluna);
-                } else {
-                    this.linhas_j2 += this.fez_linha(jogador, linha, coluna);
-                }
-                
-                console.log(this.linhas_j1, this.linhas_j2);
-                return true;
+        console.log(this.last_posj1, this.last_posj2, alvoId, peçaId);
 
-            } else {
-                mensagem('Movimento inválido');
+        //checks if the piece is being moved to the last pos. that it was at
+        if (jogador == 'j1' && this.last_posj1[0] == peçaId && this.last_posj1[1] == alvoId) {return false;}
+        if (jogador == 'j2' && this.last_posj2[0] == peçaId && this.last_posj2[1] == alvoId) {return false;}
+
+        if (jogador == this.vez()) {
+            if (this.possivel_mover(jogador, linha, coluna, originalLine, originalColumn)) {
+                this.tabuleiro[originalLine][originalColumn] = undefined; //removes the piece from the board
+                this.tabuleiro[linha][coluna] = jogador; //place the piece in the new pos. in the board
+                this.piece_to_remove = this.fez_linha(jogador, linha, coluna); 
+                
+                //save the last piece that was moved and the original pos
+                if (jogador == 'j1') {
+                    this.last_posj1[0] = peçaId;
+                    this.last_posj1[1] = originalBlock.id;
+                } else {
+                    this.last_posj2[0] = peçaId;
+                    this.last_posj2[1] = originalBlock.id;
+                }
+
+                return true;
+                 
             }
-        } else {
-            mensagem('Espere pela sua vez!');
-        }
+        } 
 
         return false;
     }
@@ -462,7 +549,61 @@ class Game {
 		return false;
     }
 
-    retirar_peça(peçaId, alvoId) {
+    remover_peça(peçaId) {
+        const bloco = document.getElementById(peçaId).parentNode;
+        const linha = parseInt(bloco.id.substring(1,2));
+        const coluna = parseInt(bloco.id.substring(2,3));
+        const peça_removida = peçaId.substring(0,2);
+        if (peça_removida != this.vez()) {
+            this.tabuleiro[linha][coluna] = undefined;
+            this.piece_to_remove = false;
+            if (peça_removida == "j1") {this.peças_j1-=1;}
+            else{ this.peças_j2 -=1;}
+            return true;
+        }
+        return false;
+    }
+
+    game_finished(){
+        if(this.peças_j1<3){
+            mensagem("Jogador 2 ganhou! Para jogar de novo reinicie o jogo.");
+            fim_mensagem("Parabéns Jogador 2, você ganhou!")
+            openEnd();
+            return true;
+        }
+        else if(this.peças_j2<3){
+            mensagem("Jogador 1 ganhou! Para jogar de novo reinicie o jogo.")
+            fim_mensagem("Parabéns Jogador 1, você ganhou!")
+            openEnd();
+            return true;
+        }
+        return false;
+    }
+
+    desistir() { //used the same div of the winning message to avoid creating new ones
+        if(this.vez() == 'j1') {
+            mensagem("O Jogador 1 desistiu! Se quiser jogar reinicie o jogo!");
+            fim_mensagem("O Jogador 1 desistiu!");
+        } else {
+            mensagem('O Jogador 2 desistiu! Se quiser jogar reinicie o jogo!');
+            fim_mensagem("O Jogador 2 desistiu!");
+        }
+        for(var i=0; i<num_peças; i++){
+            const peçaj1 = document.getElementById("j1" + (i + 1));
+            const peçaj2 = document.getElementById("j2" + (i + 1));
+            peçaj1.setAttribute("draggable", "false");
+            peçaj2.setAttribute("draggable", "false");
+        }
+        openEnd();
+    }
+
+    end_of_game(){
+        for(var i=0; i<num_peças; i++){
+            const peçaj1 = document.getElementById("j1" + (i + 1));
+            const peçaj2 = document.getElementById("j2" + (i + 1));
+            peçaj1.setAttribute("draggable", "false");
+            peçaj2.setAttribute("draggable", "false");
+        }
 
     }
 }
@@ -477,6 +618,24 @@ function closeInstruction() {
     instruction.style.display = 'none';
 }
 
+function openEnd(){
+    var fim = document.getElementById("fim");
+    fim.style.display = 'flex';
+}
+
+function closeEnd() {
+    var fim = document.getElementById("fim");
+    fim.style.display = 'none';
+}
+
+function mensagem(text) {
+    document.getElementById('mensagens').innerText = text;
+}
+
+function fim_mensagem(text) {
+    document.getElementById('fim_inner').innerText = text;
+}
+
 function allowDrop(ev) {
     ev.preventDefault();
 }
@@ -486,32 +645,61 @@ function drag(ev) {
 }
 
 function drop(ev) {
-    ev.preventDefault(); // Prevent the default action of the element
+    ev.preventDefault(); 
     var data = ev.dataTransfer.getData("text");
     var alvoId = ev.target.id;
-    if(game.jogadas < 2*num_peças) { //fase 1
-        if (alvoId.substring(0,1) != "j" && game.colocar_peça(data, alvoId)){ //única maneira que consegui de evitar que uma peça seja movida para dentro da mesma peça
+    if(game.jogadas < 2*num_peças) { //phase 1
+        if (alvoId.substring(0,1) != "j" && game.colocar_peça(data, alvoId)){
             ev.target.appendChild(document.getElementById(data));
             mensagem('Movimento efetuado com sucesso!');
             game.jogadas++;
-            if(game.jogadas == 2*num_peças) {
-                game.mudança();
-            }
         }  
-    } else { //fase 2
+    } else { //phase 2
 
-        // TODO: removal of pieces
-        if (alvoId.substring(0,1) != "j" && game.mover_peça(data, alvoId)) {
-            ev.target.appendChild(document.getElementById(data));
-            mensagem('Movimento efetuado com sucesso!');
-            game.jogadas++;
+        
+
+        if (!game.piece_to_remove){
+
+            if (alvoId.substring(0,1) == "b" && game.mover_peça(data, alvoId)) {
+                ev.target.appendChild(document.getElementById(data));
+                mensagem('Movimento efetuado com sucesso!');
+                if (!game.piece_to_remove) { //increase jogadas if there is no pieces to remove, else waits until the piece is removed
+                    game.jogadas++;
+                } else {
+                    mensagem('Tem de remover uma peça do adversário.');
+                }
+            } else if (data.substring(0,2) != game.vez()){
+                mensagem("Espere pela sua vez!");
+            } else {
+                mensagem("Movimento inválido!");
+            }
+        } else {
+            if (data.substring(0,2) == 'j1') {var fora = 'fora2';} else {var fora = 'fora1';} 
+            if (alvoId.substring(0,5) == fora){ //sees if the piece was moved to the right place
+                if (game.remover_peça(data)) { //sees if this piece can be removed
+                    ev.target.appendChild(document.getElementById(data));
+                    game.jogadas++; //increase jogadas because before we didnt
+                    mensagem("Peça removida com sucesso!");
+                    if(game.game_finished()){
+                        game.end_of_game();
+                    }
+                }
+            } else {
+                mensagem("Tem de retirar uma peça do adversário para o seu espaço");
+            }
         }
     }
-}
 
-function mensagem(text) {
-    document.getElementById('mensagens').innerText = text;
-}
+    if (game.againstAI && game.vez() == "j2"){
+        game.GameAI.nextStep( game.tabuleiro, game.fase );
+        
+        game.jogadas++;
+    }
 
+    if(game.jogadas == 2*num_peças) {
+        game.mudança();
+    }
+
+}
 
 var game = new Game();
