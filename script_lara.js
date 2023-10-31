@@ -1,4 +1,4 @@
-const num_peças =3 ;
+const num_peças =12 ;
 //https://www.youtube.com/watch?v=k1kC8b6t2kg
 
 class Tabuleiro{
