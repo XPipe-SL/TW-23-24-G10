@@ -23,14 +23,12 @@ class gameAI {
             let choice = Math.floor( Math.random()*spots.length);
             let chosenSpot = "b"+spots[choice];
             let currentPiece = "j2"+Math.floor((game.jogadas+1)/2);
-            console.log(spots.length)
-            console.log(choice);
 
             // Move a piece there
 
             // There should be a function to directly move pieces
 
-            if ( game.colocar_peça( currentPiece, chosenSpot)){
+            if (game.colocar_peça( currentPiece, chosenSpot)) {
                 document.getElementById( chosenSpot ).appendChild( document.getElementById(currentPiece) );
             }else{ console.log("oops"); }
         
@@ -43,32 +41,105 @@ class gameAI {
 
             // WARNING: pieces are numbered from 1 to num_peças instead of from 0 to num_peças
 
-            let piecesMovements = new Array();
+            let possiblePieces = new Array(); // Stores which pieces can be moved
+
+            let piecesMovements = new Array();  // Stores movement posibilities for each piece
+            // 0 = down, 1=up, 2=right, 3=left
+
             for (let i=0; i<num_peças; i++){
                 piecesMovements[i] = new Array();
 
                 let currentPiece = "j2"+(i+1);
                 let currentBlock = document.getElementById(currentPiece).parentNode;
-                console.log(currentBlock);
-                console.log(currentPiece);
-                let currentLine = parseInt(currentBlock.id.substring(1,2));
-                let currentColumn = parseInt(currentBlock.id.substring(2,3));
 
-                for (let j=0; j<4; j++){
+                if (currentBlock.id != "fora1" && currentBlock.id != "fora2"){
+                    let currentLine = parseInt(currentBlock.id.substring(1,2));
+                    let currentColumn = parseInt(currentBlock.id.substring(2,3));
 
-                    // Generate positions in a loop?
+                    for (let j=0; j<4; j++){
 
-                    // Check last_pos here
+                        // Generate positions in a loop
 
-                    if (game.possivel_mover("j2", currentLine+1, currentColumn, currentLine, currentColumn)){
+                        let movLine = currentLine;
+                        let movColumn = currentColumn;
 
+                        switch(j){
+                            case 0:
+                                if (currentLine < tabuleiro.length-1) { movLine++; }
+                                break;
+
+                            case 1:
+                                if (currentLine > 1) { movLine--; }
+                                break;
+
+                            case 2:
+                                if (currentColumn < tabuleiro[1].length-1) { movColumn++; }
+                                break;
+
+                            case 3:
+                                if (currentColumn > 1) { movColumn--; }
+                        }
+
+                        // Check last_pos here
+
+                        let movBlock = "b"+movLine+movColumn;
+
+                        if ( !(game.last_posj2[0] == currentPiece && game.last_posj2[1] == movBlock) ){
+                            if (game.possivel_mover("j2", movLine, movColumn, currentLine, currentColumn)){
+                                piecesMovements[i].push(movBlock);
+                            }
+                        }
                     }
+                }
+
+                if (piecesMovements[i].length > 0){
+                    possiblePieces.push(i);
                 }
             }
 
+            // If there are no possibilities to move a piece, surrender
+            if (possiblePieces.length == 0){ game.desistir() };
+
             // Choose randomly
+            let chosenPieceNum = possiblePieces[Math.floor( Math.random()*possiblePieces.length )];
+            let chosenPiece = "j2"+(chosenPieceNum+1);
+            let chosenMovNum = Math.floor( Math.random()*piecesMovements[chosenPieceNum].length );
+            let chosenMov = piecesMovements[chosenPieceNum][chosenMovNum];
 
             // Move the piece
+
+            if (game.mover_peça( chosenPiece, chosenMov )) {
+                document.getElementById( chosenMov ).appendChild( document.getElementById(chosenPiece) );
+            }else{ console.log("oops"); }
+
+            // Piece removal management
+
+            if (game.piece_to_remove){
+
+                console.log("Your time is over puny human");
+
+                // List all enemy pieces in the board
+
+                let piecesToRemove = new Array();
+
+                for (let i=0; i<num_peças; i++){
+                    let currentPiece = "j1"+(i+1);
+                    let currentBlock = document.getElementById(currentPiece).parentNode;
+
+                    if (currentBlock.id != "fora1" && currentBlock.id != "fora2"){
+                        piecesToRemove.push(currentPiece);
+                    }
+                }
+
+                // Choose one randomly
+
+                let choice = Math.floor( Math.random()*piecesToRemove.length );
+
+                // Remove!
+
+                game.remover_peça(piecesToRemove[choice]);
+                document.getElementById( "fora2" ).appendChild( document.getElementById(piecesToRemove[choice]) );
+            }
         }
     }
 }
@@ -356,7 +427,7 @@ class Game {
         const originalLine = parseInt(originalBlock.id.substring(1,2)); // original line of that block
         const originalColumn = parseInt(originalBlock.id.substring(2,3)); // original column of that block
         
-        console.log(this.last_posj1, this.last_posj2, alvoId, peçaId);
+        // console.log(this.last_posj1, this.last_posj2, alvoId, peçaId);
 
         //checks if the piece is being moved to the last pos. that it was at
         if (jogador == 'j1' && this.last_posj1[0] == peçaId && this.last_posj1[1] == alvoId) {return false;}
@@ -680,9 +751,6 @@ function drop(ev) {
                     ev.target.appendChild(document.getElementById(data));
                     game.jogadas++; //increase jogadas because before we didnt
                     mensagem("Peça removida com sucesso!");
-                    if(game.game_finished()){
-                        game.end_of_game();
-                    }
                 }
             } else {
                 mensagem("Tem de retirar uma peça do adversário para o seu espaço");
@@ -698,6 +766,10 @@ function drop(ev) {
 
     if(game.jogadas == 2*num_peças) {
         game.mudança();
+    }
+
+    if(game.game_finished()){
+        game.end_of_game();
     }
 
 }
