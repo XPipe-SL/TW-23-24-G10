@@ -1,6 +1,160 @@
 const num_peças =12 ;
 //https://www.youtube.com/watch?v=k1kC8b6t2kg
 
+// Game AI
+
+class gameAI {
+    constructor(){};
+
+    nextStep( tabuleiro, fase ){
+        if ( fase==1 ){
+            // Choose a spot to move a piece to
+            // Calculate available spots
+            let spots = new Array();
+
+            for (let i=1; i<tabuleiro.length; i++){
+                for (let j=1; j<tabuleiro[i].length; j++){
+                    if (game.possivel_colocar("j2",i,j)) spots.push(""+i+j);
+                }
+            }
+
+            // Choose randomly
+
+            let choice = Math.floor( Math.random()*spots.length);
+            let chosenSpot = "b"+spots[choice];
+            let currentPiece = "j2"+Math.floor((game.jogadas+1)/2);
+
+            // Move a piece there
+
+            // There should be a function to directly move pieces
+
+            if (game.colocar_peça( currentPiece, chosenSpot)) {
+                document.getElementById( chosenSpot ).appendChild( document.getElementById(currentPiece) );
+                mensagem("A AI colocou a peça na linha " + chosenSpot.substring(1,2) + " e na coluna " + chosenSpot.substring(2,3) + ".");
+            }
+            
+        }else{
+            // List all the pieces and all their possible movements
+
+            // WARNING: the possivel_mover function does not check that
+            // the movement is not the last position
+            // Check here
+
+            // WARNING: pieces are numbered from 1 to num_peças instead of from 0 to num_peças
+
+            let possiblePieces = new Array(); // Stores which pieces can be moved
+
+            let piecesMovements = new Array();  // Stores movement posibilities for each piece
+            // 0 = down, 1=up, 2=right, 3=left
+
+            for (let i=0; i<num_peças; i++){
+                piecesMovements[i] = new Array();
+
+                let currentPiece = "j2"+(i+1);
+                let currentBlock = document.getElementById(currentPiece).parentNode;
+
+                if (currentBlock.id != "fora1" && currentBlock.id != "fora2"){
+                    let currentLine = parseInt(currentBlock.id.substring(1,2));
+                    let currentColumn = parseInt(currentBlock.id.substring(2,3));
+
+                    for (let j=0; j<4; j++){
+
+                        // Generate positions in a loop
+
+                        let movLine = currentLine;
+                        let movColumn = currentColumn;
+
+                        switch(j){
+                            case 0:
+                                if (currentLine < tabuleiro.length-1) { movLine++; }
+                                break;
+
+                            case 1:
+                                if (currentLine > 1) { movLine--; }
+                                break;
+
+                            case 2:
+                                if (currentColumn < tabuleiro[1].length-1) { movColumn++; }
+                                break;
+
+                            case 3:
+                                if (currentColumn > 1) { movColumn--; }
+                        }
+
+                        // Check last_pos here
+
+                        let movBlock = "b"+movLine+movColumn;
+
+                        if ( !(game.last_posj2[0] == currentPiece && game.last_posj2[1] == movBlock) ){
+                            if (game.possivel_mover("j2", movLine, movColumn, currentLine, currentColumn)){
+                                piecesMovements[i].push(movBlock);
+                            }
+                        }
+                    }
+                }
+
+                
+
+                if (piecesMovements[i].length > 0){
+                    possiblePieces.push(i);
+                }
+
+            }
+
+            // If there are no possibilities to move a piece, surrender
+            if (possiblePieces.length == 0){ game.desistir() };
+
+            // Choose randomly
+            let chosenPieceNum = possiblePieces[Math.floor( Math.random()*possiblePieces.length )];
+            let chosenPiece = "j2"+(chosenPieceNum+1);
+            let chosenMovNum = Math.floor( Math.random()*piecesMovements[chosenPieceNum].length );
+            let chosenMov = piecesMovements[chosenPieceNum][chosenMovNum];
+
+            // Move the piece
+            const lastline = document.getElementById(chosenPiece).parentNode.id.substring(1,2);
+            const lastcolumn = document.getElementById(chosenPiece).parentNode.id.substring(2,3);
+            if (game.mover_peça( chosenPiece, chosenMov )) {
+                
+                mensagem("A AI moveu a peça da posição (" + lastline + "," + lastcolumn + ") para ("+ chosenMov.substring(1,2) + "," +  chosenMov.substring(2,3) + ").")
+
+                document.getElementById( chosenMov ).appendChild( document.getElementById(chosenPiece) );
+            }
+
+            // Piece removal management
+
+            if (game.piece_to_remove){
+
+                console.log("Your time is over puny human");
+
+                // List all enemy pieces in the board
+
+                let piecesToRemove = new Array();
+
+                for (let i=0; i<num_peças; i++){
+                    let currentPiece = "j1"+(i+1);
+                    let currentBlock = document.getElementById(currentPiece).parentNode;
+
+                    if (currentBlock.id != "fora1" && currentBlock.id != "fora2"){
+                        piecesToRemove.push(currentPiece);
+                    }
+                }
+
+                // Choose one randomly
+
+                let choice = Math.floor( Math.random()*piecesToRemove.length );
+
+                // Remove!
+
+                game.remover_peça(piecesToRemove[choice]);
+                mensagem("A AI fez linha movendo a peça da posição (" + lastline + "," + lastcolumn + ") para ("+ chosenMov.substring(1,2) + "," +  chosenMov.substring(2,3) + ") e removeu uma peça da posição (" + document.getElementById(piecesToRemove[choice]).parentNode.id.substring(1,2) + "," +  document.getElementById(piecesToRemove[choice]).parentNode.id.substring(2,3) + ").")
+
+                document.getElementById( "fora2" ).appendChild( document.getElementById(piecesToRemove[choice]) );
+
+            }
+        }
+    }
+}
+
 class Tabuleiro{
 	constructor(linhas,colunas){
 		this.colunas = linhas;
@@ -111,6 +265,12 @@ class Game {
         this.piece_to_remove = false;
         this.last_posj1 = new Array(2);
         this.last_posj2 = new Array(2);
+
+        if (document.getElementById("ia").checked){
+            this.againstAI = true;
+            this.GameAI = new gameAI();
+        }
+        else { this.againstAI = false; }
     }
 
     //non-main
@@ -197,16 +357,8 @@ class Game {
                 }
                 peça.draggable = false; //bloqueia a peça durnte a fase 1 após ser colocada no tabuleiro
                 return true;
-            } else { //jogada inválida
-                mensagem('Movimento inválido');
             }
-
-        } else if(!peça.draggable) { //se a peça já estiver no tabuleiro
-            mensagem('Não pode mover uma peça já posta no tabuleiro.'); 
-        } else if(jogador != this.vez()){ //se não for a vez deste jogador
-            mensagem('Espere pela sua vez!');
-        }
-
+        } 
         return false;
     }
 
@@ -278,7 +430,7 @@ class Game {
         const originalLine = parseInt(originalBlock.id.substring(1,2)); // original line of that block
         const originalColumn = parseInt(originalBlock.id.substring(2,3)); // original column of that block
         
-        console.log(this.last_posj1, this.last_posj2, alvoId, peçaId);
+        // console.log(this.last_posj1, this.last_posj2, alvoId, peçaId);
 
         //checks if the piece is being moved to the last pos. that it was at
         if (jogador == 'j1' && this.last_posj1[0] == peçaId && this.last_posj1[1] == alvoId) {return false;}
@@ -488,27 +640,31 @@ class Game {
 
     game_finished(){
         if(this.peças_j1<3){
-            mensagem("Jogador 2 ganhou! Para jogar de novo reinicie o jogo.");
-            fim_mensagem("Parabéns Jogador 2, você ganhou!")
+            if (!this.againstAI) {
+                mensagem("O jogador 2 ganhou! Para jogar de novo reinicie o jogo.");
+                fim_mensagem("Parabéns jogador 2, ganhaste!")
+            } else {
+                mensagem("A máquina ganhou! Para jogar de novo reinicie o jogo.");
+                fim_mensagem("A máquina ganhou!");
+            }
             openEnd();
             return true;
         }
         else if(this.peças_j2<3){
-            mensagem("Jogador 1 ganhou! Para jogar de novo reinicie o jogo.")
-            fim_mensagem("Parabéns Jogador 1, você ganhou!")
+            mensagem("O jogador 1 ganhou! Para jogar de novo reinicie o jogo.")
+            fim_mensagem("Parabéns jogador 1, ganhaste!")
             openEnd();
             return true;
-        }
-        return false;
+        } 
     }
 
     desistir() { //used the same div of the winning message to avoid creating new ones
         if(this.vez() == 'j1') {
-            mensagem("O Jogador 1 desistiu! Se quiser jogar reinicie o jogo!");
-            fim_mensagem("O Jogador 1 desistiu!");
+            mensagem("O jogador 1 desistiu! Se quiser jogar reinicie o jogo!");
+            fim_mensagem("O jogador 1 desistiu! \n" + "Parabéns jogador 2, ganhaste!");
         } else {
-            mensagem('O Jogador 2 desistiu! Se quiser jogar reinicie o jogo!');
-            fim_mensagem("O Jogador 2 desistiu!");
+            mensagem('O jogador 2 desistiu! Se quiser jogar reinicie o jogo!');
+            fim_mensagem("O jogador 2 desistiu! \n " + "Parabéns jogador 1, ganhaste!");
         }
         for(var i=0; i<num_peças; i++){
             const peçaj1 = document.getElementById("j1" + (i + 1));
@@ -542,12 +698,21 @@ function closeInstruction() {
 
 function openEnd(){
     var fim = document.getElementById("fim");
+    fim.style.width = (document.getElementById('tab_main').offsetWidth - 26) + 'px';
+    fim.style.height = (document.getElementById('tab_main').offsetHeight - 26) + 'px';
+    document.getElementById('tab_main').style.display = 'none';
     fim.style.display = 'flex';
+    document.getElementById('give_up').disabled = true;
+    document.getElementById('open_instruction').disabled = true;
 }
 
-function closeEnd() {
+function closeEnd(cor) {
     var fim = document.getElementById("fim");
+    game.restore(cor);
     fim.style.display = 'none';
+    document.getElementById('tab_main').style.display = 'flex';
+    document.getElementById('give_up').disabled = false;
+    document.getElementById('open_instruction').disabled = false;
 }
 
 function mensagem(text) {
@@ -564,24 +729,26 @@ function allowDrop(ev) {
 
 function drag(ev) {
     ev.dataTransfer.setData("text", ev.target.id);
+
 }
 
 function drop(ev) {
     ev.preventDefault(); 
     var data = ev.dataTransfer.getData("text");
     var alvoId = ev.target.id;
+
     if(game.jogadas < 2*num_peças) { //phase 1
         if (alvoId.substring(0,1) != "j" && game.colocar_peça(data, alvoId)){
             ev.target.appendChild(document.getElementById(data));
             mensagem('Movimento efetuado com sucesso!');
             game.jogadas++;
-            if(game.jogadas == 2*num_peças) {
-                game.mudança();
-            }
-        }  
-    } else { //phase 2
+        } else if (data.substring(0,2) != game.vez()) {
+            mensagem("Espere pela sua vez!");
+        } else if (!document.getElementById(data).draggable) {
+            mensagem('Não pode mover uma peça já posta no tabuleiro.');             
+        } else { mensagem("Jogada inválida!");}
 
-        
+    } else { //phase 2
 
         if (!game.piece_to_remove){
 
@@ -591,10 +758,12 @@ function drop(ev) {
                 if (!game.piece_to_remove) { //increase jogadas if there is no pieces to remove, else waits until the piece is removed
                     game.jogadas++;
                 } else {
-                    mensagem('Tem de remover uma peça do adversário.');
+                    mensagem('Fez uma linha, tem de remover uma peça do adversário.');
                 }
-            } else if (data.substring(0,2) != game.vez()){
+            } else if (data.substring(0,2) != game.vez()) {
                 mensagem("Espere pela sua vez!");
+            } else if( document.getElementById(data).parentNode.id.substring(0,4) == 'fora'){
+                mensagem("Não pode mover uma peça já removida do tabuleiro.");
             } else {
                 mensagem("Movimento inválido!");
             }
@@ -605,14 +774,25 @@ function drop(ev) {
                     ev.target.appendChild(document.getElementById(data));
                     game.jogadas++; //increase jogadas because before we didnt
                     mensagem("Peça removida com sucesso!");
-                    if(game.game_finished()){
-                        game.end_of_game();
-                    }
                 }
             } else {
-                mensagem("Tem de retirar uma peça do adversário para o seu espaço");
+                mensagem("Tem de retirar uma peça do adversário para o seu espaço.");
             }
         }
+    }
+
+    if (game.againstAI && game.vez() == "j2"){
+        game.GameAI.nextStep( game.tabuleiro, game.fase );
+        
+        game.jogadas++;
+    }
+
+    if(game.jogadas == 2*num_peças) {
+        game.mudança();
+    }
+
+    if(game.game_finished() && game.fase == 2){
+        game.end_of_game();
     }
 }
 
