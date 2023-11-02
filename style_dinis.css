@@ -16,8 +16,6 @@ html,body{
     display: flex;
     background-color: beige;
     align-items: stretch;
-
-
 }
 
 .main{  
@@ -49,8 +47,6 @@ html,body{
 
 .tab_main{
     display: flex;
-    
-
 }
 
 #mensagens{
@@ -64,7 +60,6 @@ html,body{
 .tabuleiro{
     background-color: whitesmoke;
     display: grid;
-    grid-template-columns: auto auto auto auto auto;
     gap: 3px;
     padding: 3px;
     margin: 10px;
@@ -143,23 +138,31 @@ html,body{
 
 .fechar{
     float: right;
+    position: relative;
+    top: -3%;
     cursor: pointer;
     font-size: 35px;
 }
 
 #instruções{
+    flex-basis: 74%; 
+    background-color: lightgrey;
+    border-radius: 7px;
     display: none; 
-    position: absolute; 
-    padding: 1%;
-    top: 5%;
-    left: 10%;
-    width: 78%; 
-    height: 88%; 
-    border-radius: 20px;
-    background-color: rgb(33, 34, 36);
-    color: white; 
+    padding: 3%;
+    margin: 1px;
+
+    color: black; 
     font-size: larger;
     line-height: 120%;
+}
+
+
+#instruções img{
+    width: 200px;
+    height: 200px;
+    
+    object-fit: scale-down;
 }
 
 #fim {
@@ -169,7 +172,7 @@ html,body{
     font-size: xx-large;
     transition: all 0.5s ease-in-out;
     align-items: center;
-    border-radius: 10%;
+    border-radius: 40px;
     padding: 3px;
     margin: 10px;
 
@@ -227,4 +230,37 @@ input[type="radio"]:checked + label {
     background-color: rgb(27,55,117);
     color: #fff;
     border-color: rgb(27,55,117);
+}
+
+#ratings {
+    background-color: lightgrey;
+    display: none;
+    flex-basis: 74%; 
+    border-radius: 7px;
+    padding: 3%;
+    margin: 1px;
+    color: black;
+    font-size: large;
+    transition: all 0.5s ease-in-out;
+    align-items: center;
+
+    gap: 3px;
+    align-items: center;
+
+}
+
+#ratings_table {
+    display: table;
+    width: 90%;
+    border-collapse: collapse;
+}
+
+.linha_tabela {
+    display: table-row;
+}
+
+.cell {
+    display: table-cell;
+    border: 1px solid black;
+    padding: 8px;
 }

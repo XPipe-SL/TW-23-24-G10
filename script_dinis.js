@@ -191,7 +191,6 @@ class Tabuleiro{
 
 class Fora {
     constructor(first) {
-
         const tab_main = document.getElementById("tab_main");
 
         if (first) {
@@ -226,8 +225,50 @@ class Fora {
     }
 }
 
+class Table {
+    constructor() {
+        this.numberOfPlayers = 3;
+        this.ratings = document.getElementById('ratings');
+        this.table = document.getElementById('ratings_table');
+        const cabeçalho = document.createElement('div');
+        cabeçalho.classList.add('cabeçalho_tabela');
+        const rank = document.createElement('div');
+        const nomes = document.createElement('div');
+        const points = document.createElement('div');
+        rank.classList.add('cell');
+        nomes.classList.add('cell');
+        points.classList.add('cell');
+        this.table.appendChild(rank);
+        this.table.appendChild(nomes);
+        this.table.appendChild(points);
+        for (let i = 0; i<this.numberOfPlayers; i++) {
+            const linha = document.createElement("div");
+            linha.classList.add('linha_tabela');
+            this.table.appendChild(linha);
+            for (let j = 0; j<3; j++) {
+                const stat = document.createElement("div");
+                stat.classList.add('cell');
+                if (j == 0) { 
+                    stat.classList.add('rank');
+                    stat.innerHTML= (i+1);
+                }
+                else if (j == 1) { 
+                    stat.classList.add('name');
+                    stat.innerHTML = 'joao';
+                }
+                else {
+                    stat.classList.add('points');
+                    stat.innerText = '365';
+                }
+                linha.appendChild(stat);
+            }
+        }
+    }
+}
+
 class Game {
     constructor(j1, j2) {
+        this.rating = new Table();
         this.restore(j1,j2);
     }
 
@@ -658,7 +699,7 @@ class Game {
         } 
     }
 
-    desistir() { //used the same div of the winning message to avoid creating new ones
+    desistir() { 
         if(this.vez() == 'j1') {
             mensagem("O jogador 1 desistiu! Se quiser jogar reinicie o jogo!");
             fim_mensagem("O jogador 1 desistiu! \n" + "Parabéns jogador 2, ganhaste!");
@@ -688,11 +729,13 @@ class Game {
 
 function openInstruction() {
     var instruction = document.getElementById("instruções");
+    document.getElementById('main').style.display = 'none';
     instruction.style.display = 'block';
 }
 
 function closeInstruction() {
     var instruction = document.getElementById("instruções");
+    document.getElementById('main').style.display = 'flex';
     instruction.style.display = 'none';
 }
 
@@ -701,18 +744,26 @@ function openEnd(){
     fim.style.width = (document.getElementById('tab_main').offsetWidth - 26) + 'px';
     fim.style.height = (document.getElementById('tab_main').offsetHeight - 26) + 'px';
     document.getElementById('tab_main').style.display = 'none';
-    fim.style.display = 'flex';
     document.getElementById('give_up').disabled = true;
     document.getElementById('open_instruction').disabled = true;
+    fim.style.display = 'flex';
 }
 
 function closeEnd(cor) {
     var fim = document.getElementById("fim");
     game.restore(cor);
-    fim.style.display = 'none';
-    document.getElementById('tab_main').style.display = 'flex';
     document.getElementById('give_up').disabled = false;
     document.getElementById('open_instruction').disabled = false;
+    fim.style.display = 'none';
+    mensagem("Jogo reiniciado.");
+    document.getElementById('tab_main').style.display = 'flex';
+}
+
+function openRatings() {
+    var ratings = document.getElementById('ratings');
+    var table = document.getElementById('table');
+    document.getElementById('main').style.display = 'none';
+    ratings.style.display = 'flex';  
 }
 
 function mensagem(text) {
@@ -796,4 +847,6 @@ function drop(ev) {
     }
 }
 
+
+var rating = new Tabuleiro();
 var game = new Game();

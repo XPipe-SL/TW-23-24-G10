@@ -12,31 +12,35 @@
     <div class="everything">
         
         <div id="instruções"> <!-- bloco escondido enquanto não carrego no botaõ -->
-            <span class="fechar" onclick="closeInstruction()">&times;</span> <!-- o botão para fehcar as isntruções -->
-            No jogo Dara é considerada uma linha qualquer sequência de <span class="destacado">3 peças</span> na <span class="destacado">horizontal</span> ou <span class="destacado">vertical</span> apenas e não na diagonal.
-            O jogo divide-se em duas fases:
-            <h1>1ª fase:</h1>
-            <ul>
-                <li>Esta fase consiste em colocar as peças no tabuleiro;</li>
-                <li>Cada jogador coloca alternadamente uma peça numa casa livre;</li>
-                <li>Não podem existir mais de 3 peças em linha;</li>
-            </ul>
-            <h1>2ª fase:</h1>
-            <ul>
-                <li>Cada jogador move alternadamente uma peça sua;</li>
-                <li>Uma peça só pode ser movida para uma casa na <span class="destacado">horizontal</span> ou  <span class="destacado">vertical</span>;</li>
-                <li>Uma peça não pode regressar à posição da jogada anterior, apenas nas jogadas seguintes;</li>
-                <li>Quando se tem uma linha pode-se tirar uma peça do adversário do tabuleiro;</li>
-                <li>Só se pode remover uma peça do tabuleiro por jogada, mesmo tendo feito mais que uma linha;</li>
-                <li>Não se podem formar linhas com mais de 3 peças;</li>
-            </ul>
-            O jogo acaba quando ninguém puder ganhar, ou seja, ou tiver duas peças no tabuleiro ou não puder fazer nenhuma jogada válida. <br/>
-            <div style="position: relative; top:20%; width:100%; text-align: center; font-size: 300%;"> Divirta-se!</div>
-            <img src="smile.png">
-        </div>
+                <span class="fechar" onclick="closeInstruction()">&times;</span><br> <!-- o botão para fehcar as isntruções -->
+                No jogo Dara é considerada uma linha qualquer sequência de <span class="destacado">3 peças</span> na <span class="destacado">horizontal</span> ou <span class="destacado">vertical</span> apenas e não na diagonal.
+                O jogo divide-se em duas fases:
+                <h1>1ª fase:</h1>
+                <ul>
+                    <li>Esta fase consiste em colocar as peças no tabuleiro;</li>
+                    <li>Cada jogador coloca alternadamente uma peça numa casa livre;</li>
+                    <li>Não podem existir mais de 3 peças em linha;</li>
+                </ul>
+                <h1>2ª fase:</h1>
+                <ul>
+                    <li>Cada jogador move alternadamente uma peça sua;</li>
+                    <li>Uma peça só pode ser movida para uma casa na <span class="destacado">horizontal</span> ou  <span class="destacado">vertical</span>;</li>
+                    <li>Uma peça não pode regressar à posição da jogada anterior, apenas nas jogadas seguintes;</li>
+                    <li>Quando se tem uma linha pode-se tirar uma peça do adversário do tabuleiro;</li>
+                    <li>Só se pode remover uma peça do tabuleiro por jogada, mesmo tendo feito mais que uma linha;</li>
+                    <li>Não se podem formar linhas com mais de 3 peças;</li>
+                </ul>
+                O jogo acaba quando ninguém puder ganhar, ou seja, ou tiver duas peças no tabuleiro ou não puder fazer nenhuma jogada válida. <br/>
+                <div style="position: relative; top:20%; width:100%; text-align: center; font-size: 300%;"> Divirta-se!</div>
+                <img src="smile.png">
+            </div>
 
-        <div class = "main">
-            <div class="above_tab">
+            <div id="ratings">
+                <div id="ratings_table"></div>
+            </div>
+
+        <div class = "main" id="main">
+            <div id="above_tab">
                 <button id='restart' onclick="closeEnd(document.getElementById('cor').value)">Reiniciar o jogo</button>
                 <button id='open_instruction' onclick="openInstruction()">Visualizar instruções</button>
             </div>
@@ -58,9 +62,9 @@
                     Aqui irão aparecer as mensagens!
             </div>
 
-            <div class="below_tab">
+            <div id="below_tab">
                 <button id="give_up" onclick="game.desistir()">Desistir do jogo</button>
-                <button >Visualizar classificações</button>
+                <button id="see_ratings" onclick="openRatings()">Visualizar classificações</button>
             </div>   
         </div>
 
@@ -70,11 +74,9 @@
             </div>
                 
             <div class="login">
-                <form action="login" method="post">
                     Username: <input type="text" id="username"> <br>
                     Password: <input type="password" id="password">
-                    <button > Submeter </button>
-                </form>
+                    <button> Submeter </button>
             </div>
 
             <div class="options">
