@@ -1,4 +1,4 @@
-const num_peças =12 ;
+const num_peças =12;
 //https://www.youtube.com/watch?v=k1kC8b6t2kg
 
 class Tabuleiro{
@@ -94,7 +94,8 @@ class Game {
 		this.colunas = parseInt(document.getElementById('comprimento').value);
 		this.linhas = parseInt(document.getElementById('altura').value);
 
-        this.current = j1;
+        this.j1 = j1;
+        this.j2 = j2;
         this.tabuleiro_desenho = new Tabuleiro(this.colunas,this.linhas);
         this.fora_j1 = new Fora(true);
         this.fora_j2 = new Fora(false);
@@ -486,16 +487,21 @@ class Game {
         return false;
     }
 
+   
+
+
     game_finished(){
         if(this.peças_j1<3){
             mensagem("Jogador 2 ganhou!");
-            ganhou_mensagem("Parabéns Jogador 2, você ganhou!")
+            ganhou_mensagem("Parabéns Jogador 2, você ganhou!");
+            this.update_classifications(this.j2);
             openWinning();
             return true;
         }
         else if(this.peças_j2<3){
-            mensagem("Jogador 1 ganhou!")
-            ganhou_mensagem("Parabéns Jogador 1, você ganhou!")
+            mensagem("Jogador 1 ganhou!");
+            ganhou_mensagem("Parabéns Jogador 1, você ganhou!");
+            this.update_classifications(this.j1);
             openWinning();
             return true;
         }
@@ -511,6 +517,71 @@ class Game {
         }
 
     }
+
+    update_classifications(name){
+        var points = Math.abs(this.peças_j1-this.peças_j2);
+        var table = document.getElementById("tab_clas");
+        var rows = table.rows;
+        var changed = false;
+        /*go throug list and see if name is already in it*/
+        for (var i = 1; i < (rows.length); i++) {
+            var name_cell= rows[i].getElementsByTagName("TD")[1].innerHTML;
+            if (name==name_cell) {
+                changed = true;
+                /*check if points are higher than before*/
+                var old_points = rows[i].getElementsByTagName("TD")[2].innerHTML;
+                if (points>old_points) {
+                    /*change points*/
+                    rows[i].getElementsByTagName("TD")[2].innerHTML = points;
+                }
+            }
+        }
+        if (!changed) { /*means, name wasnt in table jet*/
+            /*add row to table (is inserted as the first row)*/
+            var new_row = table.insertRow(1);
+            var cell1 = new_row.insertCell(0);
+            var cell2 = new_row.insertCell(1);
+            var cell3 = new_row.insertCell(2);
+
+            cell1.innerHTML = "0";
+            cell2.innerHTML = name;
+            cell3.innerHTML = points;
+        }
+
+        /*sort the table in decrecing order of points*/
+        var switching = true;
+        var shouldSwitch;
+        while (switching) {
+            switching = false;
+            rows = table.rows;
+            for (var i = 1; i < (rows.length - 1); i++) {
+              shouldSwitch = false;
+              /* Get the two elements you want to compare,
+              one from current row and one from the next: */
+              var x = rows[i].getElementsByTagName("TD")[2];
+              var y = rows[i + 1].getElementsByTagName("TD")[2];
+              // Check if the two rows should switch place:
+              if (x.innerHTML < y.innerHTML) {
+                // If so, mark as a switch and break the loop:
+                shouldSwitch = true;
+                break;
+              }
+            }
+            if (shouldSwitch) {
+              /* If a switch has been marked, make the switch
+              and mark that a switch has been done: */
+              rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+              switching = true;
+            }
+          }
+
+          /*make numeration right*/
+          for (var i = 1; i < (rows.length - 1); i++) {
+            rows[i].getElementsByTagName("TD")[0].innerHTML = i;
+          }
+    }
+
+   
 }
 
 function openInstruction() {
@@ -524,15 +595,24 @@ function closeInstruction() {
 }
 
 function openWinning(){
-    var instruction = document.getElementById("ganhou");
-    instruction.style.display = 'flex';
+    var ganhou = document.getElementById("ganhou");
+    ganhou.style.display = 'flex';
 }
 
 function closeWinning() {
-    var instruction = document.getElementById("ganhou");
-    instruction.style.display = 'none';
+    var ganhou = document.getElementById("ganhou");
+    ganhou.style.display = 'none';
 }
 
+function openClassificações(){
+    var classificações = document.getElementById("classificações");
+    classificações.style.display = "flex";
+}
+
+function closeClassificações(){
+    var classificações = document.getElementById("classificações");
+    classificações.style.display = "none";
+}
 
 function allowDrop(ev) {
     ev.preventDefault();

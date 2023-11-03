@@ -3,7 +3,7 @@
     <head>
         <meta charset=UTF-8>       
         <title>Jogo Dara</title>  
-        <link rel="stylesheet" href="style_dinis.css" type="text/css"> 
+        <link rel="stylesheet" href="style_lara.css" type="text/css"> 
         
     </head>
 
@@ -12,7 +12,7 @@
     <div class="everything">
         <div id="ganhou">
                 <div id="ganhou_inner"></div> <br>
-                <div><button id="closeGanhar" onclick="closeWinning()"> OK </button></div>
+                <button id="closeGanhar" onclick="closeWinning()"> OK </button>
             </div>
         <div id="instruções"> <!-- bloco escondido enquanto não carrego no botaõ -->
             <span class="fechar" onclick="closeInstruction()">X</span> <!-- o botão para fehcar as isntruções -->
@@ -38,6 +38,26 @@
             <img src="smile.png">
         </div>
 
+        <div id="classificações" >
+            
+            <div id="classificações_inner"> 
+                <span class="fechar" onclick="closeClassificações()">X</span> <br>
+                <table id="tab_clas">
+                    <tr> 
+                        <th>Posição</th>
+                        <th>Nome</th>
+                        <th>Pontos</th>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                   
+                </table>
+            </div>
+        </div>
+
         
 
         <div class = "main">
@@ -59,7 +79,7 @@
             </div>
             <div class="below_tab">
                 <button>Desistir Jogo</button>
-                <button>Vizualizar Classificações</button>
+                <button onclick="openClassificações()">Vizualizar Classificações</button>
             </div>   
         </div>
 
@@ -117,7 +137,7 @@
             </div>
         </div>
     </div>
-    <script type="text/javascript" src="script_dinis.js"></script>
+    <script type="text/javascript" src="script_lara.js"></script>
 </body>
 
 </html>
