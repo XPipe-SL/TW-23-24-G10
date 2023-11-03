@@ -1,4 +1,4 @@
-const num_peças =12 ;
+ const num_peças =12 ;
 //https://www.youtube.com/watch?v=k1kC8b6t2kg
 
 // Game AI
@@ -225,50 +225,10 @@ class Fora {
     }
 }
 
-class Table {
-    constructor() {
-        this.numberOfPlayers = 3;
-        this.ratings = document.getElementById('ratings');
-        this.table = document.getElementById('ratings_table');
-        const cabeçalho = document.createElement('div');
-        cabeçalho.classList.add('cabeçalho_tabela');
-        const rank = document.createElement('div');
-        const nomes = document.createElement('div');
-        const points = document.createElement('div');
-        rank.classList.add('cell');
-        nomes.classList.add('cell');
-        points.classList.add('cell');
-        this.table.appendChild(rank);
-        this.table.appendChild(nomes);
-        this.table.appendChild(points);
-        for (let i = 0; i<this.numberOfPlayers; i++) {
-            const linha = document.createElement("div");
-            linha.classList.add('linha_tabela');
-            this.table.appendChild(linha);
-            for (let j = 0; j<3; j++) {
-                const stat = document.createElement("div");
-                stat.classList.add('cell');
-                if (j == 0) { 
-                    stat.classList.add('rank');
-                    stat.innerHTML= (i+1);
-                }
-                else if (j == 1) { 
-                    stat.classList.add('name');
-                    stat.innerHTML = 'joao';
-                }
-                else {
-                    stat.classList.add('points');
-                    stat.innerText = '365';
-                }
-                linha.appendChild(stat);
-            }
-        }
-    }
-}
+
 
 class Game {
     constructor(j1, j2) {
-        this.rating = new Table();
         this.restore(j1,j2);
     }
 
@@ -687,6 +647,7 @@ class Game {
             } else {
                 mensagem("A máquina ganhou! Para jogar de novo reinicie o jogo.");
                 fim_mensagem("A máquina ganhou!");
+                this.update_classifications(this.j2);
             }
             openEnd();
             return true;
@@ -694,6 +655,7 @@ class Game {
         else if(this.peças_j2<3){
             mensagem("O jogador 1 ganhou! Para jogar de novo reinicie o jogo.")
             fim_mensagem("Parabéns jogador 1, ganhaste!")
+            this.update_classifications(this.j1);
             openEnd();
             return true;
         } 
@@ -725,6 +687,70 @@ class Game {
         }
 
     }
+
+    update_classifications(name){
+        var points = Math.abs(this.peças_j1-this.peças_j2);
+        var table = document.getElementById("tab_clas");
+        var rows = table.rows;
+        var changed = false;
+        /*go throug list and see if name is already in it*/
+        for (var i = 1; i < (rows.length); i++) {
+            var name_cell= rows[i].getElementsByTagName("TD")[1].innerHTML;
+            if (name==name_cell) {
+                changed = true;
+                /*check if points are higher than before*/
+                var old_points = rows[i].getElementsByTagName("TD")[2].innerHTML;
+                if (points>old_points) {
+                    /*change points*/
+                    rows[i].getElementsByTagName("TD")[2].innerHTML = points;
+                }
+            }
+        }
+        if (!changed) { /*means, name wasnt in table jet*/
+            /*add row to table (is inserted as the first row)*/
+            var new_row = table.insertRow(1);
+            var cell1 = new_row.insertCell(0);
+            var cell2 = new_row.insertCell(1);
+            var cell3 = new_row.insertCell(2);
+
+            cell1.innerHTML = "0";
+            cell2.innerHTML = name;
+            cell3.innerHTML = points;
+        }
+
+        /*sort the table in decrecing order of points*/
+        var switching = true;
+        var shouldSwitch;
+        while (switching) {
+            switching = false;
+            rows = table.rows;
+            for (var i = 1; i < (rows.length - 1); i++) {
+              shouldSwitch = false;
+              /* Get the two elements you want to compare,
+              one from current row and one from the next: */
+              var x = rows[i].getElementsByTagName("TD")[2];
+              var y = rows[i + 1].getElementsByTagName("TD")[2];
+              // Check if the two rows should switch place:
+              if (x.innerHTML < y.innerHTML) {
+                // If so, mark as a switch and break the loop:
+                shouldSwitch = true;
+                break;
+              }
+            }
+            if (shouldSwitch) {
+              /* If a switch has been marked, make the switch
+              and mark that a switch has been done: */
+              rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+              switching = true;
+            }
+          }
+
+          /*make numeration right*/
+          for (var i = 1; i < (rows.length - 1); i++) {
+            rows[i].getElementsByTagName("TD")[0].innerHTML = i;
+          }
+    }
+
 }
 
 function openInstruction() {
@@ -759,11 +785,14 @@ function closeEnd(cor) {
     document.getElementById('tab_main').style.display = 'flex';
 }
 
-function openRatings() {
-    var ratings = document.getElementById('ratings');
-    var table = document.getElementById('table');
-    document.getElementById('main').style.display = 'none';
-    ratings.style.display = 'flex';  
+function openClassificações(){
+    var classificações = document.getElementById("classificações");
+    classificações.style.display = "flex";
+}
+
+function closeClassificações(){
+    var classificações = document.getElementById("classificações");
+    classificações.style.display = "none";
 }
 
 function mensagem(text) {
@@ -846,7 +875,6 @@ function drop(ev) {
         game.end_of_game();
     }
 }
-
 
 var rating = new Tabuleiro();
 var game = new Game();

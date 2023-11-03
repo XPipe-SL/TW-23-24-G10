@@ -232,35 +232,45 @@ input[type="radio"]:checked + label {
     border-color: rgb(27,55,117);
 }
 
-#ratings {
-    background-color: lightgrey;
-    display: none;
-    flex-basis: 74%; 
-    border-radius: 7px;
-    padding: 3%;
-    margin: 1px;
-    color: black;
+#classificações{
+    display: none; 
+    background-color: rgba(0,0,0,.5);
+    color: white; 
     font-size: large;
+    position: absolute; 
+    padding: 1%;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
     transition: all 0.5s ease-in-out;
+   
     align-items: center;
-
-    gap: 3px;
-    align-items: center;
-
+    justify-content: center;
+    flex-direction: column;
 }
 
-#ratings_table {
-    display: table;
-    width: 90%;
-    border-collapse: collapse;
+#classificações_inner{
+    display: block;
+    background-color: rgb(33, 34, 36);
+    opacity: 90%;
+    padding: 1%;
+    margin: 5pt;
+    border-radius: 2%;
 }
 
-.linha_tabela {
-    display: table-row;
-}
+.table {
+    border-spacing: 0;
+    width: 100%;
+    padding: 5%;
+  }
+  
+  .th, .td {
+    text-align: left;
+    padding: 5%;
+  }
+  
+  .tr:nth-child(even) {
+    background-color: #f2f2f2
+  }
 
-.cell {
-    display: table-cell;
-    border: 1px solid black;
-    padding: 8px;
-}
