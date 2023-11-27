@@ -526,6 +526,7 @@ class GameState{
     
         }
 
+
         return piecesMovements;
     }
 

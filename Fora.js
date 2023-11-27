@@ -9,8 +9,6 @@ class Fora {
                 const peça = document.createElement("div");
                 peça.setAttribute("class", "peça j1");
                 peça.setAttribute("id", "j1" + (i + 1));
-                peça.setAttribute("draggable", "true");
-                peça.setAttribute("ondragstart", "drag(event)");
                 fora.appendChild(peça);
             }
         } else {
@@ -20,8 +18,7 @@ class Fora {
                 const peça = document.createElement("div");
                 peça.setAttribute("class", "peça j2");
                 peça.setAttribute("id", "j2" + (i + 1));
-                peça.setAttribute("draggable", "true");
-                peça.setAttribute("ondragstart", "drag(event)");
+
                 fora.appendChild(peça);
             }
         }
@@ -30,6 +27,14 @@ class Fora {
     clearFora(fora) {
         while (fora.firstChild) {
             fora.removeChild(fora.firstChild);
+        }
+    }
+
+    dragPieces(j) {
+        for (var i = 0; i < num_peças; i++) {
+            const peça = document.getElementById(j + (i + 1));
+            peça.setAttribute("draggable", "true");
+            peça.setAttribute("ondragstart", "drag(event)");
         }
     }
 }

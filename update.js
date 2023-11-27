@@ -7,7 +7,9 @@ function update(nick, gameReference) {
         data = JSON.parse(event.data);
         console.log(data);
         if(data.board) {
-            game.restore()
+            game.turnOn();
+            const nickColour = data.players.nick;
+            game.setPlayerPiece(nickColour);
         }
         
     }

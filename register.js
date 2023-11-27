@@ -7,7 +7,7 @@ function register(nick, password) {
                 console.log(JSON.parse(xhr.responseText));
                 document.getElementById('form_zone').style.display = 'none';
                 document.getElementById('logged').innerHTML = 'Logged: <br>' + nick;  
-                disableButtons(false,false,false,false,false);
+                disableButtons(true,true,true,false,false);
                 logged = true;
             }
             if(xhr.readyState == 4 && xhr.status != 200) //state != 200

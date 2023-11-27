@@ -1,20 +1,22 @@
 class Game {
-    constructor(j1, j2) {
-        this.restore(j1,j2);
+    constructor() {
+        this.j1;
+        this.j2;
+        this.restore(this.j1,this.j2);
     }
 
     restore (j1, j2) {
         if (j1 === undefined && j2 === undefined) {
-			j1 = "black";
-            j2 = "white";
+			this.j1 = "black";
+            this.j2 = "white";
         }
 
         if (j1 === 'Preto') {
-            j1 = "black";
-            j2 = "white";
+            this.j1 = "black";
+            this.j2 = "white";
         } else if (j1 === 'Branco') {
-            j1 = "white";
-            j2 = "black";
+            this.j1 = "white";
+            this.j2 = "black";
         }
 
 		let colunas = parseInt(document.getElementById('comprimento').value);
@@ -25,28 +27,16 @@ class Game {
 
         this.gameState = new GameState(linhas, colunas, (new Tabuleiro(linhas, colunas)).tabuleiro1);
 
-        // this.tabuleiro_desenho = new Tabuleiro(this.linhas, this.colunas);
         this.fora_j1 = new Fora(true);
         this.fora_j2 = new Fora(false);
-        //this.peças_j1 = num_peças;
-        //this.peças_j2 = num_peças;
 
         var r = document.querySelector(':root');
-        r.style.setProperty('--j1', j1);
-        r.style.setProperty('--j2', j2);
-		
-        // this.tabuleiro = this.tabuleiro_desenho.tabuleiro1;
-        /*this.jogadas = 0;
-        this.fase = 1;
-        this.piece_to_remove = false;
-        this.last_posj1 = new Array(2);
-        this.last_posj2 = new Array(2);*/
+        r.style.setProperty('--j1', this.j1);
+        r.style.setProperty('--j2', this.j2);
 
-        if (document.getElementById("ia").checked){
-            this.againstAI = true;
+        this.againstAI = document.getElementById("ia").checked;
+        if (this.againstAI)
             this.GameAI = new gameAI();
-        }
-        else { this.againstAI = false; }
 
         this.difficulty = 0;
         let diff = document.getElementById("nivel").value;
@@ -58,27 +48,43 @@ class Game {
     }
 
     submitChanges() {
-        if(!document.getElementById("ia").checked) { //if not ai we wait for another player
+        this.restore(document.getElementById('cor').value);
+        disableButtons(false,false,false,false,false);
+        if(document.getElementById("ia").checked) { //we turn on the game
+            this.fora_j1.dragPieces('j1');
+            this.fora_j1.dragPieces('j2');
+        } else //we sent info to server
             join(parseInt(document.getElementById('comprimento').value), parseInt(document.getElementById('altura').value));
-        } else this.restore(document.getElementById('cor').value);
     }
 
-    mudança() { //detects the end of phase 1
-        for(var i=0; i<num_peças; i++){
-            const peçaj1 = document.getElementById("j1" + (i + 1));
-            const peçaj2 = document.getElementById("j2" + (i + 1));
-            const fora1 = document.getElementById('fora1');
-            const fora2 = document.getElementById('fora2');
-            peçaj1.setAttribute("draggable", "true");
-            peçaj2.setAttribute("draggable", "true");
+    setPlayerPiece(nickColour) {
+        if (nickColour == j1) {
+            this.fora_j1.dragPieces('j1');
+        } else {
+            this.fora_j1.dragPieces('j2');
         }
-        const fora1 = document.getElementById('fora1');
-        const fora2 = document.getElementById('fora2');
-        fora1.setAttribute("ondrop", "drop(event)"); 
-        fora1.setAttribute("ondragover", "allowDrop(event)");
-        fora2.setAttribute("ondrop", "drop(event)"); 
-        fora2.setAttribute("ondragover", "allowDrop(event)");
-        //console.log('fase 2');
+    }
+
+    mudança() { //changes the atributes to phase 2
+        for(var i=0; i<num_peças; i++) { 
+            const peça1 = document.getElementById("j1" + (i + 1));
+            const peça2 = document.getElementById("j2" + (i + 1));
+            peça1.draggable = false;
+            peça2.draggable = false;
+            peça1.setAttribute('ondrag', '');
+            peça2.setAttribute('ondrag', '');
+            peça1.setAttribute("onclick", "select(event)");
+            peça2.setAttribute("onclick", "select(event)");
+        }
+
+        for(var linha = 1; linha<=this.linhas; linha++) {
+			for(var coluna = 1; coluna<=this.colunas; coluna++) {
+				const bloco = document.getElementById("b"+linha+coluna);
+				bloco.setAttribute("ondrop", ""); 
+                bloco.setAttribute("ondragover", "");
+			}
+		}
+
         this.gameState.fase++;
     }
 
