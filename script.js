@@ -9,6 +9,35 @@ function disableButtons(restart, giveUp, seeScoreBoard, instruction, submit) { /
     document.getElementById('submit').disabled = submit;
 }
 
+function changeBlockColor(blocoId, color, time) {
+    const bloco = document.getElementById(blocoId);
+
+    bloco.style.backgroundColor = color;
+    if(time !== undefined) {   
+        setTimeout(function() {
+            bloco.style.backgroundColor = 'dimgray';
+        }, time);
+    }
+}
+
+function blockPieceMovement(time) {
+    for(var i=0; i<num_peças; i++) { 
+        const peça1 = document.getElementById("j1" + (i + 1));
+        const peça2 = document.getElementById("j2" + (i + 1));
+        peça1.setAttribute("onclick", "");
+        peça2.setAttribute("onclick", "");
+    }
+
+    setTimeout(function() {
+        for(var i=0; i<num_peças; i++) { 
+            const peça1 = document.getElementById("j1" + (i + 1));
+            const peça2 = document.getElementById("j2" + (i + 1));
+            peça1.setAttribute("onclick", "select(event)");
+            peça2.setAttribute("onclick", "select(event)");
+        }
+    }, time);
+}
+
 function openInstruction() {
     var instruction = document.getElementById("instruções");
     document.getElementById('main').style.display = 'none';
@@ -88,12 +117,12 @@ function drop(ev) { //phase 1
     if (game.againstAI && game.gameState.vez() == "j2") //ai next step
         game.AInextStep();
 
-    if( game.gameState.isNextFase())  //checks next fase
+    if(game.gameState.isNextFase())  //checks next fase
         game.mudança();
     
 }
 
-function select(event) {
+function select(event) { //phase 2
     resetBlocos();
     event.preventDefault();
     const peça = event.target;
@@ -106,50 +135,57 @@ function select(event) {
             mensagem("Não pode mover um peça do oponente!");
 
         } else { //if is possible
-            const possibleMovs = game.gameState.getAvailableMovements(peça.id.substring(0,2))[peça.id.substring(2) - 1]; //possible moves for the selected piece
+            const possibleMovs = game.gameState.getAvailableMovementsPiece(peça.id.substring(0,2), peça.parentNode.id); //possible moves for the selected piece
+            console.log(peça.id, possibleMovs);
             for (let i=0; i<possibleMovs.length; i++) {
                 const bloco = document.getElementById(possibleMovs[i]);
-                bloco.style.backgroundColor = 'green';
+                changeBlockColor(bloco.id, 'green');
                 bloco.setAttribute('onclick', 'move(event,"' + peça.id + '")');
-
             }
         }       
     } else { //remove a piece
         if (peça.id.substring(0,2) == 'j1') {var fora = document.getElementById('fora2');} else {var fora = document.getElementById('fora1');} 
-        if (game.gameState.remover_peça(peça.id)) { //sees if this piece can be removed
+        if (game.gameState.remover_peça(peça.parentNode.id)) { 
             fora.appendChild(peça);
             peça.setAttribute('onclick','');
             mensagem("Peça removida com sucesso!");
-            proceed();
+            proceedPhase2();
         } else {
             mensagem("Tem de retirar uma peça do adversário para o seu espaço.");
         }
     }
 }
 
-function move(event, peçaId) {
+function move(event, peçaId) { //phase 2
     event.preventDefault();
-    const bloco = event.target;
-    if (game.gameState.mover_peça(peçaId, bloco.id)) {
-        bloco.appendChild(document.getElementById(peçaId));
+    const blocoAlvo = event.target;
+    const blocoOrigem = document.getElementById(peçaId).parentNode;
+    if (game.gameState.mover_peça(blocoOrigem.id, blocoAlvo.id)) {
+        blocoAlvo.appendChild(document.getElementById(peçaId));
         mensagem('Movimento efetuado com sucesso!');
         resetBlocos();
         if (game.gameState.piece_to_remove) { // if there is a piece to remove, waits until the piece is removed
             mensagem('Fez uma linha, tem de remover uma peça do adversário.');
         } else {
-            proceed();
+            proceedPhase2();
         }
     } else {
         mensagem("Movimento inválido!");
     }
 }
 
-function proceed() {
-    if(game.game_finished()) //checks if there's winner
-        game.end_of_game();
+function proceedPhase2() {
+    
+    if (game.againstAI && game.gameState.vez() == "j2") { //against ai  
+        
+        if(game.game_finished()) //checks if you won
+            game.end_of_game();
 
-    if (game.againstAI && game.gameState.vez() == "j2") //ai next play      
-            game.AInextStep();
+        game.AInextStep(); //ai next play
+
+        if(game.game_finished()) //checks if ai won
+            game.end_of_game();
+    }
 }
 
 function resetBlocos() { 
@@ -158,7 +194,7 @@ function resetBlocos() {
     for(let i=1; i<=linhas; i++) {
         for(let j=1; j<=colunas; j++) {
             const bloco = document.getElementById("b" + i + j);
-            bloco.style.backgroundColor = 'dimgray';
+            changeBlockColor(bloco.id, 'dimgray');
             bloco.setAttribute('onclick', '');
         }
     }

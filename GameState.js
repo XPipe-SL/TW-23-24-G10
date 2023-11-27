@@ -14,6 +14,8 @@ class GameState{
         this.jogadas = 0;
         this.fase = 1;
         this.piece_to_remove = false;
+
+        // Now the piece (last_posjX[0]) is identified by its current block
         this.last_posj1 = new Array(2);
         this.last_posj2 = new Array(2);
     }
@@ -93,9 +95,9 @@ class GameState{
     }
 
     // Checks if piece, position pair is the last one for the two players
-    isPiecePosLast( piece, pos ){
-        if (this.last_posj1[0] == piece && this.last_posj1[1] == pos) return true;
-        if (this.last_posj2[0] == piece && this.last_posj2[1] == pos) return true;
+    isPiecePosLast( pieceBlock, targetBlock ){
+        if (this.last_posj1[0] == pieceBlock && this.last_posj1[1] == targetBlock) return true;
+        if (this.last_posj2[0] == pieceBlock && this.last_posj2[1] == targetBlock) return true;
         return false;
     }
 
@@ -112,16 +114,18 @@ class GameState{
     //phase 1
 
     colocar_peça(peçaId, alvoId) {
-        const linha = parseInt(alvoId.substring(1, 2)); //obtem a linha do bloco em causa
-        const coluna = parseInt(alvoId.substring(2, 3)); //obtem a coluna do bloco em causa
-		const jogador = peçaId.substring(0,2); //obtem o jogador a quem pertence a peça
+        const linha = parseInt(alvoId.substring(1, 2));
+        const coluna = parseInt(alvoId.substring(2, 3));
+		const jogador = peçaId.substring(0,2);
         const peça = document.getElementById(peçaId);
 
         if(peça.draggable && jogador == this.vez()){ //se a peça não estiver no tabuleiro e for a vez do jogador
-		    if(this.possivel_colocar(jogador,linha,coluna)){ //jogada válida
+
+		    if(this.possivel_colocar(jogador,linha,coluna)){ //jogada válida                
                 this.tabuleiro[linha][coluna] = jogador; //coloca a peça no array tabuleiro
                 this.jogadas++;
                 if (this.isNextFase()) this.fase++;
+                if (this.fase>2) alert("oopsie");
                 return true;
             }
         } 
@@ -186,19 +190,17 @@ class GameState{
 
     //phase 2
 
-    mover_peça(peçaId, alvoId) {
+    mover_peça(peçaBlocoId, alvoId) {
         const linha = parseInt(alvoId.substring(1, 2)); //obtem a linha do bloco em causa
         const coluna = parseInt(alvoId.substring(2, 3)); //obtem a coluna do bloco em causa
-		const jogador = peçaId.substring(0,2); //obtem o jogador a quem pertence a peça
 
-        const originalBlock = document.getElementById(peçaId).parentNode; // original block of the piece
-        const originalLine = parseInt(originalBlock.id.substring(1,2)); // original line of that block
-        const originalColumn = parseInt(originalBlock.id.substring(2,3)); // original column of that block
-        
-        // console.log(this.last_posj1, this.last_posj2, alvoId, peçaId);
+        const originalLine = parseInt(peçaBlocoId.substring(1,2)); // original line of that block
+        const originalColumn = parseInt(peçaBlocoId.substring(2,3)); // original column of that block
+        const jogador = this.tabuleiro[originalLine][originalColumn]; //obtem o jogador a quem pertence a peça
+
 
         //checks if the piece is being moved to the last pos. that it was at
-        if (this.isPiecePosLast( peçaId, alvoId )) return false;
+        if (this.isPiecePosLast( peçaBlocoId, alvoId )) return false;
 
         if (jogador == this.vez()) {
             if (this.possivel_mover(jogador, linha, coluna, originalLine, originalColumn)) {
@@ -208,11 +210,11 @@ class GameState{
                 
                 //save the last piece that was moved and the original pos
                 if (jogador == 'j1') {
-                    this.last_posj1[0] = peçaId;
-                    this.last_posj1[1] = originalBlock.id;
+                    this.last_posj1[0] = alvoId;
+                    this.last_posj1[1] = peçaBlocoId;
                 } else {
-                    this.last_posj2[0] = peçaId;
-                    this.last_posj2[1] = originalBlock.id;
+                    this.last_posj2[0] = alvoId;
+                    this.last_posj2[1] = peçaBlocoId;
                 }
 
                 if (!this.piece_to_remove) this.jogadas++;
@@ -390,12 +392,11 @@ class GameState{
 		return false;
     }
 
-    remover_peça(peçaId) {
-        const bloco = document.getElementById(peçaId).parentNode;
-        const linha = parseInt(bloco.id.substring(1,2));
-        const coluna = parseInt(bloco.id.substring(2,3));
-        const peça_removida = peçaId.substring(0,2);
-        if (peça_removida != this.vez()) {
+    remover_peça(blocoId) {
+        const linha = parseInt(blocoId.substring(1,2));
+        const coluna = parseInt(blocoId.substring(2,3));
+        const peça_removida = this.tabuleiro[linha][coluna];
+        if (peça_removida != this.vez() && peça_removida != undefined) {
             this.tabuleiro[linha][coluna] = undefined;
             this.piece_to_remove = false;
             if (peça_removida == "j1") {this.peças_j1-=1;}
@@ -411,83 +412,10 @@ class GameState{
     // 1 = j1 defeat
     // 2 = j2 defeat
     game_finished(){
-        let jxLost = [false, false];
-
-        if(this.peças_j1<3){
-            jxLost[0] = true;
-        }
-        else if(this.peças_j2<3){
-            jxLost[1] = true;
-        } 
-        // Check if pieces can't be moved
-        else{
-            // Check piece by piece
-            // If it can be moved, skip following checks
-            
-            let j=0;
-            while ( !jxLost[0] && j<2){
-                jxLost[j] = true;
-                let i=0;
-
-                while (jxLost[j] && i<num_peças){
-                    // Get current position
-                    let currentPiece = "j"+(j+1)+(i+1);
-                    let currentBlock = document.getElementById(currentPiece).parentNode;
-
-                    if (currentBlock.id != "fora1" && currentBlock.id != "fora2"){
-                        let currentLine = parseInt(currentBlock.id.substring(1,2));
-                        let currentColumn = parseInt(currentBlock.id.substring(2,3));
-
-                        for (let k=0; k<4; k++){
-                            // generate position
-                            let checkLine = currentLine;
-                            let checkColumn = currentColumn;
-                            
-                            switch (k){
-                                case 0:
-                                    if (currentLine < this.tabuleiro.length-1) { checkLine++; }
-                                    break;
-
-                                case 1:
-                                    if (currentLine > 1) { checkLine--; }
-                                    break;
-
-                                case 2:
-                                    if (currentColumn < this.tabuleiro[1].length-1) { checkColumn++; }
-                                    break;
-
-                                case 3:
-                                    if (currentColumn > 1) { checkColumn--; }
-                                    break;
-                            }
-
-                            // check if movement is possible
-                            // should be a single function!
-                            if (j==0){
-                                if ( !(this.last_posj1[0] == currentPiece && this.last_posj1[1] == "b"+checkLine+checkColumn) ){
-                                    if (this.possivel_mover("j1", checkLine, checkColumn, currentLine, currentColumn)){
-                                        jxLost[j] = false;
-                                    }
-                                }
-                            }else if (j==1){
-                                if ( !(this.last_posj2[0] == currentPiece && this.last_posj2[1] == "b"+checkLine+checkColumn) ){
-                                    if (this.possivel_mover("j2", checkLine, checkColumn, currentLine, currentColumn)){
-                                        jxLost[j] = false;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    
-                    i++;
-                }
-
-                j++;
-            }
-        }
-
-        if (jxLost[0]) return 1;
-        if (jxLost[1]) return 2;
+        let availableMovementsj1 = this.getAvailableMovements("j1");
+        if (this.peças_j1<3 || availableMovementsj1.length == 0) return 1;
+        let availableMovementsj2 = this.getAvailableMovements("j2");
+        if (this.peças_j2<3 || availableMovementsj2.length == 0) return 2;
 
         return 0;
     }
@@ -510,32 +438,29 @@ class GameState{
 
     // Phase 2
     
-    // Gets all possible movements for each piece
+    // Gets all possible movements for each piece (identified by block)
     getAvailableMovements( player ){
         let piecesMovements = new Array();
 
-        for (let i=0; i<num_peças; i++){
-            piecesMovements[i] = new Array();
-    
-            let currentPiece = player+(i+1);
-            let currentBlock = document.getElementById(currentPiece).parentNode;
-    
-            if (currentBlock.id != "fora1" && currentBlock.id != "fora2"){
-                piecesMovements[i] = this.getAvailableMovementsPiece( player, currentPiece, currentBlock );
+        for (let i=1; i<=this.linhas; i++) {
+            for (let j=1; j<=this.colunas; j++) {
+                if (this.tabuleiro[i][j] == player) {
+                    let currentBlock = "b"+i+j;
+                    let availableMovementsPiece = this.getAvailableMovementsPiece( player, currentBlock );
+                    if (availableMovementsPiece.length > 0) piecesMovements.push( [currentBlock, availableMovementsPiece] );
+                }
             }
-    
         }
-
 
         return piecesMovements;
     }
 
     // Gets possible movements (blocks) for a piece (identified by its current block)
-    getAvailableMovementsPiece( player, piece, block ){
+    getAvailableMovementsPiece( player, block ){
         let piecesMovements = new Array();
 
-        let currentLine = parseInt(block.id.substring(1,2));
-        let currentColumn = parseInt(block.id.substring(2,3));
+        let currentLine = parseInt(block.substring(1,2));
+        let currentColumn = parseInt(block.substring(2,3));
     
         for (let j=0; j<4; j++){
     
@@ -563,7 +488,7 @@ class GameState{
     
             let movBlock = "b"+movLine+movColumn;
 
-            if ( !(this.isPiecePosLast( piece, movBlock)) && this.possivel_mover(player, movLine, movColumn, currentLine, currentColumn) ){
+            if ( !(this.isPiecePosLast(block, movBlock)) && this.possivel_mover(player, movLine, movColumn, currentLine, currentColumn) ){
                 piecesMovements.push( movBlock );
             }
         }
@@ -571,16 +496,13 @@ class GameState{
         return piecesMovements;
     }
 
-    // Returns pieces in the board of a player (for removal purposes)
+    // Returns pieces in the board of a player (positions in the board)
     getPiecesOnBoard( player ){
         let piecesOnBoard = new Array();
 
-        for (let i=0; i<num_peças; i++){
-            let currentPiece = player+(i+1);
-            let currentBlock = document.getElementById(currentPiece).parentNode;
-
-            if (currentBlock.id != "fora1" && currentBlock.id != "fora2"){
-                piecesOnBoard.push(currentPiece);
+        for (let i=1; i<=this.linhas; i++) {
+            for (let j=1; j<=this.colunas; j++) {
+                if (this.tabuleiro[i][j] == player) piecesOnBoard.push("b"+i+j);
             }
         }
 

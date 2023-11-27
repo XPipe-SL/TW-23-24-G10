@@ -35,8 +35,6 @@ class Game {
         r.style.setProperty('--j2', this.j2);
 
         this.againstAI = document.getElementById("ia").checked;
-        if (this.againstAI)
-            this.GameAI = new gameAI();
 
         this.difficulty = 0;
         let diff = document.getElementById("nivel").value;
@@ -84,34 +82,34 @@ class Game {
                 bloco.setAttribute("ondragover", "");
 			}
 		}
-
-        this.gameState.fase++;
     }
 
     game_finished(){
         let finished = this.gameState.game_finished();
 
         if (finished == 1){
-            
-            if (!this.againstAI) {
-                mensagem("O jogador 2 ganhou! Para jogar de novo reinicie o jogo.");
-                fim_mensagem("Parabéns jogador 2, ganhaste!")
-            } else {
-                mensagem("A máquina ganhou! Para jogar de novo reinicie o jogo.");
-                fim_mensagem("A máquina ganhou!");
-                this.update_classifications(this.j2);
-            }
-            openEnd();
-            return true;
-            
+            setTimeout(function() {
+                if (!this.againstAI) {
+                    mensagem("O jogador 2 ganhou! Para jogar de novo reinicie o jogo.");
+                    fim_mensagem("Parabéns jogador 2, ganhaste!")
+                } else {
+                    mensagem("A máquina ganhou! Para jogar de novo reinicie o jogo.");
+                    fim_mensagem("A máquina ganhou!");
+                    this.update_classifications(this.j2);
+                }
+                openEnd();
+                return true;
+            }, 2000);
         }
 
         if (finished == 2){
-            mensagem("O jogador 1 ganhou! Para jogar de novo reinicie o jogo.")
-            fim_mensagem("Parabéns jogador 1, ganhaste!")
-            this.update_classifications(this.j1);
-            openEnd();
-            return true;
+            setTimeout(function() {
+                mensagem("O jogador 1 ganhou! Para jogar de novo reinicie o jogo.")
+                fim_mensagem("Parabéns jogador 1, ganhaste!")
+                this.update_classifications(this.j1);
+                openEnd();
+                return true;
+            }, 2000);           
         }
 
         return false;
@@ -211,18 +209,18 @@ class Game {
         // Movement
         // [0]: 0: fase 1, 1: fase 2, 2: removal
         // [1]: block id
-        // [2]: piece id
-        // [3]: removed piece id (if it applies)
+        // [2]: piece id (case 0) or last block id of piece
+        // [3]: removed piece block id
         let movement = new Array(4);
 
         switch ( this.difficulty ) {
             
             case 1:
-                movement = miniMaxNextStep( this.gameState, 5);
+                movement = miniMaxNextStep( this.gameState, 1);
                 break;
 
             case 2:
-                movement = miniMaxNextStep( this.gameState, 7);
+                movement = miniMaxNextStep( this.gameState, 3);
                 break;
 
             default:
@@ -234,26 +232,36 @@ class Game {
         // Phase 1
         if (movement[0]==0) {
             mensagem("A AI colocou a peça na linha " + movement[1].substring(1,2) + " e na coluna " + movement[1].substring(2,3) + ".");
+            document.getElementById( movement[1] ).appendChild( document.getElementById( movement[2] ) );
         
         // Phase 2
-        } else {
-            let lastline = document.getElementById(movement[2]).parentNode.id.substring(1,2);
-            let lastcolumn = document.getElementById(movement[2]).parentNode.id.substring(2,3);
-
+        } else {            
+            document.getElementById( movement[1] ).appendChild( document.getElementById( movement[2] ).firstChild );
             // No piece was removed
             if (movement[0]==1) {
-                mensagem("A AI moveu a peça da posição (" + lastline + "," + lastcolumn + ") para ("+ movement[1].substring(1,2) + "," +  movement[1].substring(2,3) + ").")
+                changeBlockColor(movement[2], 'yellow');
+                changeBlockColor(movement[1], 'green');
+                mensagem("A AI moveu a peça do bloco amarelo para o verde.")
             
             // A piece was removed
             } else {
-                mensagem("A AI fez linha movendo a peça da posição (" + lastline + "," + lastcolumn + ") para ("+ movement[1].substring(1,2) + "," +  movement[1].substring(2,3) + ") e removeu uma peça da posição (" + document.getElementById( movement[3] ).parentNode.id.substring(1,2) + "," +  document.getElementById( movement[3] ).parentNode.id.substring(2,3) + ").");
-                document.getElementById( "fora2" ).appendChild( document.getElementById(movement[3]) );
+                blockPieceMovement(1500);
+                changeBlockColor(movement[2], 'yellow', 1500);
+                changeBlockColor(movement[1], 'green', 1500);
+                mensagem("A AI fez uma linha, movendo do bloco amarelo para o verde.");
+                setTimeout(function() {
+                    document.getElementById( "fora2" ).appendChild( document.getElementById(movement[3]).firstChild );~
+                    changeBlockColor(movement[3], 'red');
+                    mensagem('A AI removeu uma peça sua.');
+                }, 1500);
+                //mensagem("A AI fez linha movendo a peça da posição (" + movement[2].substring(1,2) + "," + movement[2].substring(2,3) + ") para ("+ movement[1].substring(1,2) + "," +  movement[1].substring(2,3) + ") e removeu uma peça da posição (" + movement[3].substring(1,2) + "," +  movement[3].substring(2,3) + ").");
+                
+
+                
+
             }
 
-            document.getElementById( movement[1] ).appendChild( document.getElementById(movement[2]) );
         }
-
-        document.getElementById( movement[1] ).appendChild( document.getElementById(movement[2]) );
     }
 
 }

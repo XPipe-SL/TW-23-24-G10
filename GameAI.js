@@ -1,18 +1,3 @@
-// Auxiliary functions
-
-// Returns an array with the non zero rows of matrix arg
-function nonZero(arg){
-    let ret = new Array();
-    
-    for (let i=0; i<num_peças; i++){
-        if (arg[i].length > 0){
-            ret.push(i);
-        }
-    }
-
-    return ret;
-}
-
 // Game AI
 
 // Random
@@ -47,35 +32,26 @@ function randomNextStepFase1( gameState ){
 function randomNextStepFase2( gameState ){
     // List all the pieces and all their possible movements
 
-    // WARNING: the possivel_mover function does not check that
-    // the movement is not the last position
-    // Check here
-
-    // WARNING: pieces are numbered from 1 to num_peças instead of from 0 to num_peças-1
-
     // Stores movement posibilities for each piece
     let piecesMovements = gameState.getAvailableMovements( "j2" );
 
-    // Stores which pieces can be moved (positions in the other array not undefined)
-    let possiblePieces = nonZero( piecesMovements );
-
     // Choose randomly
-    let chosenPieceNum = possiblePieces[Math.floor( Math.random()*possiblePieces.length )];
-    let chosenPiece = "j2"+(chosenPieceNum+1);
-    let chosenMovNum = Math.floor( Math.random()*piecesMovements[chosenPieceNum].length );
-    let chosenMov = piecesMovements[chosenPieceNum][chosenMovNum];
+    let chosenPieceNum = Math.floor( Math.random()*piecesMovements.length );
+    let chosenPieceBlock = piecesMovements[chosenPieceNum][0];
+    let chosenMovNum = Math.floor( Math.random()*piecesMovements[chosenPieceNum][1].length );
+    let chosenMov = piecesMovements[chosenPieceNum][1][chosenMovNum];
 
     // Move the piece
 
-    gameState.mover_peça( chosenPiece, chosenMov );
+    gameState.mover_peça( chosenPieceBlock, chosenMov );
 
     // Piece removal management
 
     if (gameState.piece_to_remove){
-        return [2, chosenMov, chosenPiece, randomRemoval( gameState )];
+        return [2, chosenMov, chosenPieceBlock, randomRemoval( gameState )];
     }
     
-    return [1, chosenMov, chosenPiece, undefined];
+    return [1, chosenMov, chosenPieceBlock, undefined];
 }
 
 function randomRemoval( gameState ){
@@ -114,7 +90,7 @@ function miniMaxNextStepFase1(gameState, depth){
 
     // Choose a spot
     let max = -Infinity;
-    let chosenSpot = undefined;
+    let maxSpots = new Array();
     let currentPiece = "j2"+Math.floor((gameState.jogadas+1)/2);
 
     for (let i=0; i<availableSpots.length; i++){
@@ -127,9 +103,15 @@ function miniMaxNextStepFase1(gameState, depth){
 
         if ( max < curValue ){
             max = curValue;
-            chosenSpot = spot;
+            maxSpots = new Array();
+            maxSpots.push(spot);
         }
+
+        if (max == curValue) maxSpots.push(spot);
     }
+
+    // Choose one randomly from the different maximal posibilities
+    let chosenSpot = maxSpots[ Math.floor( Math.random()*maxSpots.length )]
 
     // Move the piece there
 
@@ -141,212 +123,616 @@ function miniMaxNextStepFase1(gameState, depth){
 
 // Assumes depth%2 == 1
 function miniMaxNextStepFase2(gameState, depth){
+    // List all the pieces and all their possible movements
 
-}
+    // Stores movement posibilities for each piece
+    let piecesMovements = gameState.getAvailableMovements( "j2" );
 
-function miniMax( gameState, depth ){
-    if (depth==0){
-        return eval(gameState);
-    }
-}
+    // Choose a piece, a movement and a piece to remove (if necessary)
+    let max = -Infinity;
+    let maxPieceMovRemove = new Array();
 
-class gameAI {
-    constructor(){};
+    for (let i=0; i<piecesMovements.length; i++) {
+        let piece = piecesMovements[i][0];
+        for (let j=0; j<piecesMovements[i][1].length; j++) {
+            let mov = piecesMovements[i][1][j];
+            let node = new GameState(0,0,[]);
+            node.deep_copy(gameState);
 
-    nextStep( gameState ){
-        switch (gameState.difficulty){
-            case 1:
-                this.miniMaxNextStep(gameState, 1);
-                break;
-            
-            case 2:
-                this.miniMaxNextStep(gameState, 1);
-                break;
+            node.mover_peça( piece, mov );
 
-            case 0:
-            default:
-                this.randomNextStep(gameState);
-                break;
-        }
-    }
-
-    randomNextStep(gameState){
-
-        if ( gameState.fase==1 ){
-            // Choose a spot to move a piece to
-            // Calculate available spots
-            let spots = new Array();
-
-            for (let i=1; i<gameState.tabuleiro.length; i++){
-                for (let j=1; j<gameState.tabuleiro[i].length; j++){
-                    if (gameState.possivel_colocar("j2",i,j)) spots.push(""+i+j);
-                }
-            }
-
-            // Choose randomly
-
-            let choice = Math.floor( Math.random()*spots.length);
-            let chosenSpot = "b"+spots[choice];
-            let currentPiece = "j2"+Math.floor((gameState.jogadas+1)/2);
-
-            // Move a piece there
-
-            // There should be a function to directly move pieces
-
-            if (gameState.colocar_peça( currentPiece, chosenSpot)) {
-                document.getElementById( chosenSpot ).appendChild( document.getElementById(currentPiece) );
-                mensagem("A AI colocou a peça na linha " + chosenSpot.substring(1,2) + " e na coluna " + chosenSpot.substring(2,3) + ".");
-            }
-            
-        }else{
-            // List all the pieces and all their possible movements
-
-            // WARNING: the possivel_mover function does not check that
-            // the movement is not the last position
-            // Check here
-
-            // WARNING: pieces are numbered from 1 to num_peças instead of from 0 to num_peças
-
-            let possiblePieces = new Array(); // Stores which pieces can be moved
-
-            let piecesMovements = new Array();  // Stores movement posibilities for each piece
-            // 0 = down, 1=up, 2=right, 3=left
-
-            for (let i=0; i<num_peças; i++){
-                piecesMovements[i] = new Array();
-
-                let currentPiece = "j2"+(i+1);
-                let currentBlock = document.getElementById(currentPiece).parentNode;
-
-                if (currentBlock.id != "fora1" && currentBlock.id != "fora2"){
-                    let currentLine = parseInt(currentBlock.id.substring(1,2));
-                    let currentColumn = parseInt(currentBlock.id.substring(2,3));
-
-                    for (let j=0; j<4; j++){
-
-                        // Generate positions in a loop
-
-                        let movLine = currentLine;
-                        let movColumn = currentColumn;
-
-                        switch(j){
-                            case 0:
-                                if (currentLine < gameState.tabuleiro.length-1) { movLine++; }
-                                break;
-
-                            case 1:
-                                if (currentLine > 1) { movLine--; }
-                                break;
-
-                            case 2:
-                                if (currentColumn < gameState.tabuleiro[1].length-1) { movColumn++; }
-                                break;
-
-                            case 3:
-                                if (currentColumn > 1) { movColumn--; }
-                        }
-
-                        // Check last_pos here
-
-                        let movBlock = "b"+movLine+movColumn;
-
-                        if ( !(gameState.last_posj2[0] == currentPiece && gameState.last_posj2[1] == movBlock) ){
-                            if (gameState.possivel_mover("j2", movLine, movColumn, currentLine, currentColumn)){
-                                piecesMovements[i].push(movBlock);
-                            }
-                        }
-                    }
-                }
-
-                
-
-                if (piecesMovements[i].length > 0){
-                    possiblePieces.push(i);
-                }
-
-            }
-
-            // Choose randomly
-            let chosenPieceNum = possiblePieces[Math.floor( Math.random()*possiblePieces.length )];
-            let chosenPiece = "j2"+(chosenPieceNum+1);
-            let chosenMovNum = Math.floor( Math.random()*piecesMovements[chosenPieceNum].length );
-            let chosenMov = piecesMovements[chosenPieceNum][chosenMovNum];
-
-            // Move the piece
-            const lastline = document.getElementById(chosenPiece).parentNode.id.substring(1,2);
-            const lastcolumn = document.getElementById(chosenPiece).parentNode.id.substring(2,3);
-            if (gameState.mover_peça( chosenPiece, chosenMov )) {
-                
-                mensagem("A AI moveu a peça da posição (" + lastline + "," + lastcolumn + ") para ("+ chosenMov.substring(1,2) + "," +  chosenMov.substring(2,3) + ").")
-
-                document.getElementById( chosenMov ).appendChild( document.getElementById(chosenPiece) );
-            }
-
-            // Piece removal management
-
-            if (gameState.piece_to_remove){
-
+            if (node.piece_to_remove) {
                 // List all enemy pieces in the board
 
-                let piecesToRemove = new Array();
+                let piecesToRemove = gameState.getPiecesOnBoard( "j1" );
 
-                for (let i=0; i<num_peças; i++){
-                    let currentPiece = "j1"+(i+1);
-                    let currentBlock = document.getElementById(currentPiece).parentNode;
+                for (let k=0; k<piecesToRemove.length; k++) {
+                    let remove = piecesToRemove[k];
+                    let noder = new GameState(0,0,[]);
+                    noder.deep_copy(node);
+                    noder.remover_peça( remove );
 
-                    if (currentBlock.id != "fora1" && currentBlock.id != "fora2"){
-                        piecesToRemove.push(currentPiece);
+                    let curVal = miniMax( noder, depth-1 );
+
+                    if ( max < curVal ){
+                        max = curVal;
+                        maxPieceMovRemove = new Array();
+                        maxPieceMovRemove.push([piece, mov, remove]);
+                    }
+
+                    if (max==curVal) {
+                        max = curVal;
+                        maxPieceMovRemove.push([piece, mov, remove]);
                     }
                 }
+            
+            } else {
+                let curVal = miniMax( node, depth-1 );
+                
+                if ( max < curVal ){
+                    max = curVal;
+                    maxPieceMovRemove = new Array();
+                    maxPieceMovRemove.push([piece, mov, undefined])
+                }
 
-                // Choose one randomly
-
-                let choice = Math.floor( Math.random()*piecesToRemove.length );
-
-                // Remove!
-
-                gameState.remover_peça(piecesToRemove[choice]);
-                mensagem("A AI fez linha movendo a peça da posição (" + lastline + "," + lastcolumn + ") para ("+ chosenMov.substring(1,2) + "," +  chosenMov.substring(2,3) + ") e removeu uma peça da posição (" + document.getElementById(piecesToRemove[choice]).parentNode.id.substring(1,2) + "," +  document.getElementById(piecesToRemove[choice]).parentNode.id.substring(2,3) + ").")
-
-                document.getElementById( "fora2" ).appendChild( document.getElementById(piecesToRemove[choice]) );
-
+                if (max==curVal) {
+                    max = curVal;
+                    maxPieceMovRemove.push([piece, mov, undefined]);
+                }
+                
             }
         }
     }
 
-    // Assumes odd is max, even is min
-    miniMaxNextStep (gameState, depth=1){
-        if (gameState.fase==1){
-            // Calculate available spots
-            let spots = new Array();
+    let choice = Math.floor( Math.random()*maxPieceMovRemove.length );
 
-            for (let i=1; i<gameState.tabuleiro.length; i++){
-                for (let j=1; j<gameState.tabuleiro[i].length; j++){
-                    if (gameState.possivel_colocar("j2",i,j)) spots.push( [i,j] );
-                }
-            }
+    let chosenPiece = maxPieceMovRemove[choice][0];
+    let chosenMov = maxPieceMovRemove[choice][1];
+    let chosenRemove = maxPieceMovRemove[choice][2];
 
-            // Minimax choose a spot
-            let chosenSpot = -1;
+    // Move the piece
 
-            // max node (j2, AI)
-            if ( depth%2 == 1 ){
-                let max = -Infinity;
+    gameState.mover_peça( chosenPiece, chosenMov );
 
-                for(let i=0; i<spots.length; i++){
-                    let nodeGameState = new GameState( gameState.linhas, gameState.colunas, gameState.tabuleiro);
-                    nodeGameState.deep_copy(gameState);
+    // Piece removal management
 
-                    nodeGameState.tabuleiro[ spots[i][0] ][ spots[i][1] ] = "j2";
+    if (gameState.piece_to_remove){
+        gameState.remover_peça( chosenRemove );
+        return [2, chosenMov, chosenPiece, chosenRemove];
+    }
+    
+    return [1, chosenMov, chosenPiece, undefined];
+}
 
-                    let cur = miniMax (nodeGameState, depth-1);
+// Actual miniMax function: evaluates each node:
+// Max of child nodes if the AI is playing
+// Min of child nodes if the player is playing
+// Once it reaches depth, an static evaluation
+function miniMax(gameState, depth){
+    if (depth==0) {
+        return evaluate(gameState);
+    }
 
-                    if (cur>max){
-                        max = cur;
-                        chosenSpot = i;
+    // Node MAX
+    if (depth%2 == 1) {
+        if (gameState.fase == 1) {
+            return maxNodeFase1(gameState, depth);
+        }
+
+        if (gameState.fase == 2) {
+            return maxNodeFase2(gameState, depth);
+        }
+    }
+
+    // Node Min
+    if (depth%2 == 0) {
+        if (gameState.fase == 1) {
+            return minNodeFase1(gameState, depth);
+        }
+
+        if (gameState.fase == 2) {
+            return minNodeFase2(gameState, depth);
+        }
+    }
+}
+
+// Max Node: of the child nodes, choose the one with the highest evaluation
+
+function maxNodeFase1(gameState, depth) {
+    // Get all available spots
+    let availableSpots = gameState.getAvailableSpots( "j2" );
+
+    let max = -Infinity;
+    let currentPiece = "j2"+Math.floor((gameState.jogadas+1)/2);
+
+    for (let i=0; i<availableSpots.length; i++){
+        let spot = availableSpots[i];
+        let node = new GameState(0,0,[]);
+        node.deep_copy(gameState);
+
+        node.colocar_peça(currentPiece, spot);
+        let curValue = miniMax(node, depth-1);
+
+        if ( max < curValue ){
+            max = curValue;
+        }
+    }
+
+    return max;
+}
+
+function maxNodeFase2(gameState, depth) {
+    // List all the pieces and all their possible movements
+
+    // Stores movement posibilities for each piece
+    let piecesMovements = gameState.getAvailableMovements( "j2" );
+
+    // Choose a piece, a movement and a piece to remove (if necessary)
+    let max = -Infinity;
+
+    for (let i=0; i<piecesMovements.length; i++) {
+        let piece = piecesMovements[i][0];
+        for (let j=0; j<piecesMovements[i][1].length; j++) {
+            let mov = piecesMovements[i][1][j];
+            let node = new GameState(0,0,[]);
+            node.deep_copy(gameState);
+
+            node.mover_peça( piece, mov );
+
+            if (node.piece_to_remove) {
+                // List all enemy pieces in the board
+
+                let piecesToRemove = gameState.getPiecesOnBoard( "j1" );
+
+                for (let k=0; k<piecesToRemove.length; k++) {
+                    let remove = piecesToRemove[k];
+                    let noder = new GameState(0,0,[]);
+                    noder.deep_copy(node);
+                    noder.remover_peça( remove );
+
+                    let curVal = miniMax( noder, depth-1 );
+
+                    if ( max < curVal ){
+                        max = curVal;
                     }
+                }
+            
+            } else {
+                let curVal = miniMax( node, depth-1 );
+                
+                if ( max < curVal ){
+                    max = curVal;
                 }
             }
         }
     }
+
+    return max;
+}
+
+// Node MIN: choose the lowest valued child node
+
+function minNodeFase1(gameState, depth) {
+    // Get all available spots
+    let availableSpots = gameState.getAvailableSpots( "j2" );
+
+    let min = Infinity;
+    let currentPiece = "j2"+Math.floor((gameState.jogadas+1)/2);
+
+    for (let i=0; i<availableSpots.length; i++){
+        let spot = availableSpots[i];
+        let node = new GameState(0,0,[]);
+        node.deep_copy(gameState);
+
+        node.colocar_peça(currentPiece, spot);
+        let curValue = miniMax(node, depth-1);
+
+        if ( min > curValue ){
+            min = curValue;
+        }
+    }
+
+    return min;
+}
+
+function minNodeFase2(gameState, depth) {
+    // List all the pieces and all their possible movements
+
+    // Stores movement posibilities for each piece
+    let piecesMovements = gameState.getAvailableMovements( "j2" );
+
+    // Choose a piece, a movement and a piece to remove (if necessary)
+    let min = Infinity;
+
+    for (let i=0; i<piecesMovements.length; i++) {
+        let piece = piecesMovements[i][0];
+        for (let j=0; j<piecesMovements[i][1].length; j++) {
+            let mov = piecesMovements[i][1][j];
+            let node = new GameState(0,0,[]);
+            node.deep_copy(gameState);
+
+            node.mover_peça( piece, mov );
+
+            if (node.piece_to_remove) {
+                // List all enemy pieces in the board
+
+                let piecesToRemove = gameState.getPiecesOnBoard( "j1" );
+
+                for (let k=0; k<piecesToRemove.length; k++) {
+                    let remove = piecesToRemove[k];
+                    let noder = new GameState(0,0,[]);
+                    noder.deep_copy(node);
+                    noder.remover_peça( remove );
+
+                    let curVal = miniMax( noder, depth-1 );
+
+                    if ( min > curVal ){
+                        max = curVal;
+                    }
+                }
+            
+            } else {
+                let curVal = miniMax( node, depth-1 );
+                
+                if ( min > curVal ){
+                    min = curVal;
+                }
+            }
+        }
+    }
+
+    return min;
+}
+
+// Returns an evaluation on the state of the board
+function evaluate( gameState ){
+    if ( gameState.fase==1 )
+        return evaluateFase1( gameState );
+    else
+        return evaluateFase2( gameState );
+}
+
+function evaluateFase1( gameState ){
+    let result = [0,0];
+    // Count instances of two pieces in line and only other one at one step distance
+    // Such as XX_X
+    // Or XX__
+    //    __X_
+
+    for (let p=0; p<2; p++) {
+        let player = "j"+(p+1);
+
+        let piecesOnBoard = gameState.getPiecesOnBoard(player)
+
+        for (let i=0; i<piecesOnBoard.length; i++){
+            let line = piecesOnBoard[i].substring(1,2);
+            line = parseInt(line);
+            let column = piecesOnBoard[i].substring(2,3);
+            column = parseInt(column);
+
+            // Count instances of two pieces in line and only other one at one step distance
+            // Such as XX_X
+            // Or XX__
+            //    __X_
+
+            // Left to right
+            if (
+                (column <= gameState.colunas-2)
+                &&
+                // Checks it's a _XX_ situation (first piece selected)
+                gameState.tabuleiro[line][column+1] == player
+                &&
+                gameState.tabuleiro[line][column+2] == undefined
+                &&
+                (column == 1 || gameState.tabuleiro[line][column-1] != player)
+            ) {
+                
+                // Checks _XX_
+                //           X 
+                if (line < gameState.linhas && gameState.tabuleiro[line+1][column+2] == player) {
+                    result[p] += 1;
+                    // Checks there's no other piece around (to minimize risk and save pieces)
+                    if (
+                        (line == 1 || gameState.tabuleiro[line-1][column+2] == undefined)
+                        &&
+                        (column > gameState.colunas-3 || gameState.tabuleiro[line][column+3] == undefined)
+                    ) {
+                        result[p] += 3;
+                    }
+                }
+
+                // Checks    X
+                //        _XX_ 
+                if (line > 1 && gameState.tabuleiro[line-1][column+2] == player) {
+                    result[p] += 1;
+                    // Checks there's no other piece around (to minimize risk and save pieces)
+                    if (
+                        (line == gameState.linhas || gameState.tabuleiro[line+1][column+2] == undefined)
+                        &&
+                        (column > gameState.colunas-3 || gameState.tabuleiro[line][column+3] == undefined)
+                    ) {
+                        result[p] += 3;
+                    }
+                }
+
+                // Checks _XX_X
+                if (column <= gameState.colunas-3 && gameState.tabuleiro[line][column+3] == player) {
+                    result[p] += 1;
+                    // Checks there's no other piece around (to minimize risk and save pieces)
+                    if (
+                        (line == 1 || gameState.tabuleiro[line-1][column+2] == undefined)
+                        &&
+                        (line == gameState.linhas || gameState.tabuleiro[line+1][column+2] == undefined)
+                    ) {
+                        result[p] += 3;
+                    }
+                }
+            }
+
+
+            // Right to left
+            if (
+                (column >= 3)
+                &&
+                // Checks it's a _XX_ situation (second piece selected)
+                gameState.tabuleiro[line][column-1] == player
+                &&
+                gameState.tabuleiro[line][column-2] == undefined
+                &&
+                (column == gameState.colunas || gameState.tabuleiro[line][column+1] == undefined)
+            ) {
+
+                // Checks _XX_
+                //        X 
+                if (line < gameState.linhas && gameState.tabuleiro[line+1][column-2] == player) {
+                    result[p] += 1;
+                    // Checks there's no other piece around (to minimize risk and save pieces)
+                    if (
+                        (line == 1 || gameState.tabuleiro[line-1][column-2] == undefined)
+                        &&
+                        (column <= 3 || gameState.tabuleiro[line][column-3] == undefined)
+                    ) {
+                        result[p] += 3;
+                    }
+                }
+
+                // Checks X
+                //        _XX_ 
+                if (line > 1 && gameState.tabuleiro[line-1][column-2] == player) {
+                    result[p] += 1;
+                    // Checks there's no other piece around (to minimize risk and save pieces)
+                    if (
+                        (line == gameState.linhas || gameState.tabuleiro[line+1][column-2] == undefined)
+                        &&
+                        (column <= 3 || gameState.tabuleiro[line][column-3] == undefined)
+                    ) {
+                        result[p] += 3;
+                    }
+                }
+
+                // Checks X_XX_
+                if (column >=4 && gameState.tabuleiro[line][column-3] == player) {
+                    result[p] += 1;
+                    // Checks there's no other piece around (to minimize risk and save pieces)
+                    if (
+                        (line == 1 || gameState.tabuleiro[line-1][column-2] == undefined)
+                        &&
+                        (line == gameState.linhas || gameState.tabuleiro[line+1][column-2] == undefined)
+                    ) {
+                        result[p] += 3;
+                    }
+                }
+            }
+
+            // Up down
+            if (
+                (line <= gameState.linhas-2)
+                &&
+                // Checks it's a
+                // _
+                // X
+                // X
+                // _
+                // situation (first piece selected)
+                gameState.tabuleiro[line+1][column] == player
+                &&
+                gameState.tabuleiro[line+2][column] == undefined
+                &&
+                (line == 1 || gameState.tabuleiro[line-1][column] == undefined)
+            ) {
+                // Checks
+                // _
+                // X
+                // X
+                // _X
+                if (column < gameState.colunas && gameState.tabuleiro[line+2][column+1] == player) {
+                    result[p] += 1;
+                    // Checks there's no other piece around (to minimize risk and save pieces)
+                    if (
+                        (column == 1 || gameState.tabuleiro[line+2][column-1] == undefined)
+                        &&
+                        (line > gameState.linhas-3 || gameState.tabuleiro[line+3][column] == undefined)
+                    ) {
+                        result[p] += 3;
+                    }
+                }
+
+                // Checks
+                //  _
+                //  X
+                //  X
+                // X_
+                if (column > 1 && gameState.tabuleiro[line+2][column-1] == player) {
+                    result[p] += 1;
+                    // Checks there's no other piece around (to minimize risk and save pieces)
+                    if (
+                        (column == gameState.colunas || gameState.tabuleiro[line+1][column+1] == undefined)
+                        &&
+                        (line > gameState.linhas-3 || gameState.tabuleiro[line+3][column] == undefined)
+                    ) {
+                        result[p] += 3;
+                    }
+                }
+
+                // Checks
+                // _
+                // X
+                // X
+                // _
+                // X
+                if (line <= gameState.linhas-3 && gameState.tabuleiro[line+3][column] == player) {
+                    result[p] += 1;
+                    // Checks there's no other piece around (to minimize risk and save pieces)
+                    if (
+                        (column == 1 || gameState.tabuleiro[line+2][column-1] == undefined)
+                        &&
+                        (column == gameState.colunas || gameState.tabuleiro[line+1][column+1] == undefined)
+                    ) {
+                        result[p] += 3;
+                    }
+                }
+            }
+
+            // Down up
+            if (
+                (line >= 3)
+                &&
+                // Checks it's a
+                // _
+                // X
+                // X
+                // _
+                // situation (second piece selected)
+                gameState.tabuleiro[line-1][column] == player
+                &&
+                gameState.tabuleiro[line-2][column] == undefined
+                &&
+                (line == gameState.linhas || gameState.tabuleiro[line+1][column] == undefined)
+            ) {
+                // Checks
+                // _X
+                // X
+                // X
+                // _
+                if (column < gameState.colunas && gameState.tabuleiro[line-2][column+1] == player) {
+                    result[p] += 1;
+                    // Checks there's no other piece around (to minimize risk and save pieces)
+                    if (
+                        (column == 1 || gameState.tabuleiro[line-2][column-1] == undefined)
+                        &&
+                        (line <= 3  || gameState.tabuleiro[line-3][column] == undefined)
+                    ) {
+                        result[p] += 3;
+                    }
+                }
+
+                // Checks
+                // X_
+                //  X
+                //  X
+                //  _
+                if (column > 1 && gameState.tabuleiro[line-2][column-1] == player) {
+                    result[p] += 1;
+                    // Checks there's no other piece around (to minimize risk and save pieces)
+                    if (
+                        (column == gameState.colunas || gameState.tabuleiro[line-1][column+1] == undefined)
+                        &&
+                        (line <= 3  || gameState.tabuleiro[line-3][column] == undefined)
+                    ) {
+                        result[p] += 3;
+                    }
+                }
+
+                // Checks
+                // X
+                // _
+                // X
+                // X
+                // _
+                if (line >= 4 && gameState.tabuleiro[line-3][column] == player) {
+                    result[p] += 1;
+                    // Checks there's no other piece around (to minimize risk and save pieces)
+                    if (
+                        (column == 1 || gameState.tabuleiro[line-2][column-1] == undefined)
+                        &&
+                        (column == gameState.colunas || gameState.tabuleiro[line-1][column+1] == undefined)
+                    ) {
+                        result[p] += 3;
+                    }
+                }
+            }
+
+            // Count instances of blocking the other player
+            otherPlayer = "j"+(((p+1)%2) +1);
+
+            // Left to right
+            if (
+                (column <= gameState.colunas-2)
+                &&
+                // Checks it's a XYY situation
+                gameState.tabuleiro[line][column+1] == otherPlayer
+                &&
+                gameState.tabuleiro[line][column+2] == otherPlayer
+            ) {
+                result[p] += 1;
+            }
+
+            // Right to left
+            if (
+                (column >= 3)
+                &&
+                // Checks it's a YYX situation
+                gameState.tabuleiro[line][column-1] == otherPlayer
+                &&
+                gameState.tabuleiro[line][column-2] == otherPlayer
+            ) {
+                result[p] += 1;
+            }
+
+            // Up down
+            if (
+                (line <= gameState.linhas-2)
+                &&
+                // Checks it's a
+                // X
+                // Y
+                // Y
+                // situation
+                gameState.tabuleiro[line+1][column] == otherPlayer
+                &&
+                gameState.tabuleiro[line+2][column] == otherPlayer
+            ) {
+                result[p] += 1;
+            }
+
+            // Down up
+            if (
+                (line >= 3)
+                &&
+                // Checks it's a
+                // Y
+                // Y
+                // X
+                // situation (second piece selected)
+                gameState.tabuleiro[line-1][column] == otherPlayer
+                &&
+                gameState.tabuleiro[line-2][column] == otherPlayer
+            ) {
+                result[p] += 1;
+            }
+
+        }
+    }
+
+    return result[1]-result[0];
+}
+
+function evaluateFase2( gameState ){
+    // If j1 lost, it's infinite points (victory)
+    if (gameState.game_finished() == 1) return Infinity;
+    // If j2 lost, minus infinite points (defeat)
+    if (gameState.game_finished() == 2) return -Infinity;
+
+    return (gameState.peças_j2 - gameState.peças_j1)*10 + evaluateFase1(gameState);
+
 }
