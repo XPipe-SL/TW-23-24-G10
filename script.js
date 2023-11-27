@@ -65,7 +65,7 @@ function drop(ev) {
     var data = ev.dataTransfer.getData("text");
     var alvoId = ev.target.id;
 
-    if(game.gameState.jogadas < 2*num_peças) { //phase 1
+    if(game.gameState.fase == 1) { //phase 1
         if (alvoId.substring(0,1) != "j" && game.gameState.colocar_peça(data, alvoId)){
             ev.target.appendChild(document.getElementById(data));
             const peça = document.getElementById(data);
@@ -80,8 +80,9 @@ function drop(ev) {
     } else { //phase 2
 
         if (!game.gameState.piece_to_remove){
+            let peçaBlocoId = document.getElementById(data).parentNode.id;
 
-            if (alvoId.substring(0,1) == "b" && game.gameState.mover_peça(data, alvoId)) {
+            if (alvoId.substring(0,1) == "b" && game.gameState.mover_peça(peçaBlocoId, alvoId)) {
                 ev.target.appendChild(document.getElementById(data));
                 mensagem('Movimento efetuado com sucesso!');
                 if (game.gameState.piece_to_remove) { // if there is a piece to remove, waits until the piece is removed
@@ -98,7 +99,7 @@ function drop(ev) {
         } else {
             if (data.substring(0,2) == 'j1') {var fora = 'fora2';} else {var fora = 'fora1';} 
             if (alvoId.substring(0,5) == fora){ //sees if the piece was moved to the right place
-                if (game.gameState.remover_peça(data)) { //sees if this piece can be removed
+                if (game.gameState.remover_peça(document.getElementById(data).parentNode.id)) { //sees if this piece can be removed
                     ev.target.appendChild(document.getElementById(data));
                     mensagem("Peça removida com sucesso!");
                 }
@@ -112,17 +113,17 @@ function drop(ev) {
         // Check before the AI plays in case you beat it
         if(game.gameState.fase >= 2 && game.game_finished()){
             game.end_of_game();
+        } else {
+            game.AInextStep();
+            
+            if(game.gameState.fase >= 2 && game.game_finished()){
+                game.end_of_game();
+            }
         }
-
-        game.AInextStep();
     }
 
     if( game.gameState.isNextFase() ) {
         game.mudança();
-    }
-
-    if(game.gameState.fase >= 2 && game.game_finished()){
-        game.end_of_game();
     }
 
     // console.log(game.gameState.tabuleiro);

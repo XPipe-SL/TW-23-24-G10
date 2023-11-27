@@ -44,7 +44,6 @@ class Game {
 
         if (document.getElementById("ia").checked){
             this.againstAI = true;
-            this.GameAI = new gameAI();
         }
         else { this.againstAI = false; }
 
@@ -80,7 +79,6 @@ class Game {
         fora2.setAttribute("ondrop", "drop(event)"); 
         fora2.setAttribute("ondragover", "allowDrop(event)");
         //console.log('fase 2');
-        this.gameState.fase++;
     }
 
     game_finished(){
@@ -206,18 +204,18 @@ class Game {
         // Movement
         // [0]: 0: fase 1, 1: fase 2, 2: removal
         // [1]: block id
-        // [2]: piece id
-        // [3]: removed piece id (if it applies)
+        // [2]: piece id (case 0) or last block id of piece
+        // [3]: removed piece block id
         let movement = new Array(4);
 
         switch ( this.difficulty ) {
             
             case 1:
-                movement = miniMaxNextStep( this.gameState, 5);
+                movement = miniMaxNextStep( this.gameState, 1);
                 break;
 
             case 2:
-                movement = miniMaxNextStep( this.gameState, 7);
+                movement = miniMaxNextStep( this.gameState, 3);
                 break;
 
             default:
@@ -229,26 +227,22 @@ class Game {
         // Phase 1
         if (movement[0]==0) {
             mensagem("A AI colocou a peça na linha " + movement[1].substring(1,2) + " e na coluna " + movement[1].substring(2,3) + ".");
+            document.getElementById( movement[1] ).appendChild( document.getElementById( movement[2] ) );
         
         // Phase 2
         } else {
-            let lastline = document.getElementById(movement[2]).parentNode.id.substring(1,2);
-            let lastcolumn = document.getElementById(movement[2]).parentNode.id.substring(2,3);
-
             // No piece was removed
             if (movement[0]==1) {
-                mensagem("A AI moveu a peça da posição (" + lastline + "," + lastcolumn + ") para ("+ movement[1].substring(1,2) + "," +  movement[1].substring(2,3) + ").")
+                mensagem("A AI moveu a peça da posição (" + movement[2].substring(1,2) + "," + movement[2].substring(2,3) + ") para ("+ movement[1].substring(1,2) + "," +  movement[1].substring(2,3) + ").")
             
             // A piece was removed
             } else {
-                mensagem("A AI fez linha movendo a peça da posição (" + lastline + "," + lastcolumn + ") para ("+ movement[1].substring(1,2) + "," +  movement[1].substring(2,3) + ") e removeu uma peça da posição (" + document.getElementById( movement[3] ).parentNode.id.substring(1,2) + "," +  document.getElementById( movement[3] ).parentNode.id.substring(2,3) + ").");
-                document.getElementById( "fora2" ).appendChild( document.getElementById(movement[3]) );
+                mensagem("A AI fez linha movendo a peça da posição (" + movement[2].substring(1,2) + "," + movement[2].substring(2,3) + ") para ("+ movement[1].substring(1,2) + "," +  movement[1].substring(2,3) + ") e removeu uma peça da posição (" + movement[3].substring(1,2) + "," +  movement[3].substring(2,3) + ").");
+                document.getElementById( "fora2" ).appendChild( document.getElementById(movement[3]).firstChild );
             }
 
-            document.getElementById( movement[1] ).appendChild( document.getElementById(movement[2]) );
+            document.getElementById( movement[1] ).appendChild( document.getElementById( movement[2] ).firstChild );
         }
-
-        document.getElementById( movement[1] ).appendChild( document.getElementById(movement[2]) );
     }
 
 }
