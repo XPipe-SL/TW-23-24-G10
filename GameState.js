@@ -4,6 +4,8 @@
 // Also what the AI uses
 class GameState{
     constructor(linhas, colunas, tabuleiro){
+        this.turn = 'j1';
+
         this.peças_j1 = num_peças;
         this.peças_j2 = num_peças;
 
@@ -22,6 +24,8 @@ class GameState{
 
     // deep-copies another GameState
     deep_copy(gamestate){
+        this.turn = gamestate.turn;
+
         this.peças_j1 = gamestate.peças_j1;
         this.peças_j2 = gamestate.peças_j2;
 
@@ -51,9 +55,9 @@ class GameState{
 
     //non-main
 
-    vez() { //checks who has to play
-        if (this.jogadas % 2 == 0) {return 'j1';}
-        else {return 'j2';}
+    switchTurn() {
+        if(this.turn == 'j1') this.turn = 'j2';
+        else this.turn = 'j1';
     }
 
     fez_linha(jogador, linha, coluna) { //checks if the player made a line
@@ -119,11 +123,14 @@ class GameState{
 		const jogador = peçaId.substring(0,2);
         const peça = document.getElementById(peçaId);
 
-        if(peça.draggable && jogador == this.vez()){ //se a peça não estiver no tabuleiro e for a vez do jogador
+        if(peça.draggable && jogador == this.turn){ //se a peça não estiver no tabuleiro e for a vez do jogador
 
 		    if(this.possivel_colocar(jogador,linha,coluna)){ //jogada válida                
                 this.tabuleiro[linha][coluna] = jogador; //coloca a peça no array tabuleiro
+
                 this.jogadas++;
+                this.switchTurn();
+
                 if (this.isNextFase()) this.fase++;
                 if (this.fase>2) alert("oopsie");
                 return true;
@@ -202,7 +209,9 @@ class GameState{
         //checks if the piece is being moved to the last pos. that it was at
         if (this.isPiecePosLast( peçaBlocoId, alvoId )) return false;
 
-        if (jogador == this.vez()) {
+        
+
+        if (jogador == this.turn) {
             if (this.possivel_mover(jogador, linha, coluna, originalLine, originalColumn)) {
                 this.tabuleiro[originalLine][originalColumn] = undefined; //removes the piece from the board
                 this.tabuleiro[linha][coluna] = jogador; //place the piece in the new pos. in the board
@@ -217,7 +226,10 @@ class GameState{
                     this.last_posj2[1] = peçaBlocoId;
                 }
 
-                if (!this.piece_to_remove) this.jogadas++;
+                if (!this.piece_to_remove) {
+                    this.jogadas++;
+                    this.switchTurn();
+                }
 
                 return true;
                  
@@ -396,12 +408,13 @@ class GameState{
         const linha = parseInt(blocoId.substring(1,2));
         const coluna = parseInt(blocoId.substring(2,3));
         const peça_removida = this.tabuleiro[linha][coluna];
-        if (peça_removida != this.vez() && peça_removida != undefined) {
+        if (peça_removida != this.turn && peça_removida != undefined) {
             this.tabuleiro[linha][coluna] = undefined;
             this.piece_to_remove = false;
             if (peça_removida == "j1") {this.peças_j1-=1;}
             else{ this.peças_j2 -=1;}
             this.jogadas++;
+            this.switchTurn();
             return true;
         }
         return false;

@@ -47,20 +47,30 @@ class Game {
 
     submitChanges() {
         this.restore(document.getElementById('cor').value);
-        disableButtons(false,false,false,false,false);
+        closeEnd();
+        disableButtons(false,false,false,true);
         if(document.getElementById("ia").checked) { //we turn on the game
-            this.fora_j1.dragPieces('j1');
-            this.fora_j1.dragPieces('j2');
-        } else //we sent info to server
-            join(parseInt(document.getElementById('comprimento').value), parseInt(document.getElementById('altura').value));
+            this.turnOn(3);  
+            this.gameState.turn = 'j1';
+        }   
+        else //we sent info to server
+            this.login.join(parseInt(document.getElementById('altura').value), parseInt(document.getElementById('comprimento').value));
     }
 
-    setPlayerPiece(nickColour) {
-        if (nickColour == j1) {
-            this.fora_j1.dragPieces('j1');
-        } else {
-            this.fora_j1.dragPieces('j2');
+    turnOn(player, turn) {
+        if(!document.getElementById("ia").checked) {
+            if(turn == 1) this.gameState.turn = 'j1';
+            else this.gameState.turn = 'j2';
         }
+  
+        if(player == 1 || player == 3) 
+            this.fora_j1.dragPieces('j1');
+        if(player == 2 || player == 3) 
+            this.fora_j2.dragPieces('j2');
+    }
+
+    playerStatus(nick, password) {
+        this.login = new PlayerStatus(nick, password);
     }
 
     mudança() { //changes the atributes to phase 2
@@ -86,6 +96,8 @@ class Game {
 
     game_finished(){
         let finished = this.gameState.game_finished();
+
+        console.log(this.againstAI)
 
         if (finished == 1){
             setTimeout(function() {
@@ -116,20 +128,20 @@ class Game {
     }
 
     desistir() { 
-        if(this.gameState.vez() == 'j1') {
-            mensagem("O jogador 1 desistiu! Se quiser jogar reinicie o jogo!");
-            fim_mensagem("O jogador 1 desistiu! \n" + "Parabéns jogador 2, ganhaste!");
-        } else {
-            mensagem('O jogador 2 desistiu! Se quiser jogar reinicie o jogo!');
-            fim_mensagem("O jogador 2 desistiu! \n " + "Parabéns jogador 1, ganhaste!");
-        }
         for(var i=0; i<num_peças; i++){
             const peçaj1 = document.getElementById("j1" + (i + 1));
             const peçaj2 = document.getElementById("j2" + (i + 1));
             peçaj1.setAttribute("draggable", "false");
             peçaj2.setAttribute("draggable", "false");
         }
-        openEnd();
+
+        if(this.againstAI) {
+            mensagem("Você desistiu! Para jogar de novo submeta de novo");
+            fim_mensagem("Você desistiu! \n" + "A máquina ganhou!");
+            openEnd();
+        } else {
+            this.login.leave();
+        }  
     }
 
     end_of_game(){
@@ -245,7 +257,9 @@ class Game {
             
             // A piece was removed
             } else {
-                blockPieceMovement(1500);
+                // blocks player pieces to wait for ai play
+                blockPieceMovement(1);
+                setTimeout(function() {enablePieceMovement(1)}, 1800);
                 changeBlockColor(movement[2], 'yellow', 1500);
                 changeBlockColor(movement[1], 'green', 1500);
                 mensagem("A AI fez uma linha, movendo do bloco amarelo para o verde.");

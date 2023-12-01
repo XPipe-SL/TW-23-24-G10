@@ -1,8 +1,7 @@
 const num_peças =12 ;
 //https://www.youtube.com/watch?v=k1kC8b6t2kg
 
-function disableButtons(restart, giveUp, seeScoreBoard, instruction, submit) { //set true in the button you want to disable
-    document.getElementById('restart').disabled = restart;
+function disableButtons(giveUp, seeScoreBoard, instruction, submit) { //true -> button you want to disable
     document.getElementById('give_up').disabled = giveUp;
     document.getElementById('see_scoreboard').disabled = seeScoreBoard;
     document.getElementById('open_instruction').disabled = instruction;
@@ -20,24 +19,33 @@ function changeBlockColor(blocoId, color, time) {
     }
 }
 
-function blockPieceMovement(time) {
+function blockPieceMovement(player) {
     for(var i=0; i<num_peças; i++) { 
-        const peça1 = document.getElementById("j1" + (i + 1));
-        const peça2 = document.getElementById("j2" + (i + 1));
-        peça1.setAttribute("onclick", "");
-        peça2.setAttribute("onclick", "");
-    }
-
-    setTimeout(function() {
-        for(var i=0; i<num_peças; i++) { 
+        if(player == 1 || player == 3) {
             const peça1 = document.getElementById("j1" + (i + 1));
+            peça1.setAttribute("onclick", "");
+        } 
+        if(player == 2 || player == 3) {
             const peça2 = document.getElementById("j2" + (i + 1));
-            peça1.setAttribute("onclick", "select(event)");
-            peça2.setAttribute("onclick", "select(event)");
+            peça2.setAttribute("onclick", ""); 
         }
-    }, time);
+    }
 }
 
+function enablePieceMovement(player) {
+    for(var i=0; i<num_peças; i++) { 
+        if(player == 1 || player == 3) {
+            const peça1 = document.getElementById("j1" + (i + 1));
+            peça1.setAttribute("onclick", "select(event)");
+        } 
+        if(player == 2 || player == 3) {
+            const peça2 = document.getElementById("j2" + (i + 1));
+            peça2.setAttribute("onclick", "select(event)");  
+        }    
+    }
+}
+
+//Instruction
 function openInstruction() {
     var instruction = document.getElementById("instruções");
     document.getElementById('main').style.display = 'none';
@@ -50,24 +58,29 @@ function closeInstruction() {
     instruction.style.display = 'none';
 }
 
+//End screen
 function openEnd(){
     var fim = document.getElementById("fim");
     fim.style.width = (document.getElementById('tab_main').offsetWidth - 26) + 'px';
     fim.style.height = (document.getElementById('tab_main').offsetHeight - 26) + 'px';
+
     document.getElementById('tab_main').style.display = 'none';
-    disableButtons(false,true,false,true,true);
+
+    disableButtons(true,false,false,false);
+
     fim.style.display = 'flex';
 }
 
-function closeEnd(cor) {
+function closeEnd() {
     var fim = document.getElementById("fim");
-    game.restore(cor);
-    disableButtons(false,false,false,false,false);
     fim.style.display = 'none';
-    mensagem("Jogo reiniciado.");
+    
     document.getElementById('tab_main').style.display = 'flex';
+    
+    mensagem("Jogo reiniciado.");
 }
 
+//scoreboard
 function openClassificações(){
     var classificações = document.getElementById("classificações");
     classificações.style.display = "flex";
@@ -104,9 +117,11 @@ function drop(ev) { //phase 1
         ev.target.appendChild(document.getElementById(data));
         const peça = document.getElementById(data);
         peça.draggable = false; //bloqueia a peça durnte a fase 1 após ser colocada no tabuleiro
+        if(!game.againstAI)
+            game.login.notify(parseInt( alvoId.substring(1, 2)) - 1, parseInt(alvoId.substring(2,3)) - 1, data );
         mensagem('Movimento efetuado com sucesso!');
 
-    } else if (data.substring(0,2) != game.gameState.vez()) { //not is turn
+    } else if (data.substring(0,2) != game.gameState.turn) { //not is turn
         mensagem("Não pode mover uma peça do oponente!");
 
     } else if (!document.getElementById(data).draggable) { //can't move a piece already in the board
@@ -114,7 +129,7 @@ function drop(ev) { //phase 1
 
     } else { mensagem("Jogada inválida!");} //non valid play
 
-    if (game.againstAI && game.gameState.vez() == "j2") //ai next step
+    if (game.againstAI && game.gameState.turn == "j2") //ai next step
         game.AInextStep();
 
     if(game.gameState.isNextFase())  //checks next fase
@@ -131,7 +146,7 @@ function select(event) { //phase 2
         if (peça.parentNode.id.substring(0,4) == 'fora'){ //if the piece is outside
             mensagem("Não pode mover uma peça já removida do tabuleiro.");
 
-        } else if (peça.id.substring(0,2) != game.gameState.vez()) { //if not his turn
+        } else if (peça.id.substring(0,2) != game.gameState.turn) { //if not his turn
             mensagem("Não pode mover um peça do oponente!");
 
         } else { //if is possible
@@ -176,7 +191,7 @@ function move(event, peçaId) { //phase 2
 
 function proceedPhase2() {
     
-    if (game.againstAI && game.gameState.vez() == "j2") { //against ai  
+    if (game.againstAI && game.gameState.turn == "j2") { //against ai  
         
         if(game.game_finished()) //checks if you won
             game.end_of_game();

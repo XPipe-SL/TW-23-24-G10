@@ -56,7 +56,7 @@
 
         <div class = "main" id="main">
             <div id="above_tab">
-                <button id='restart' onclick="closeEnd(document.getElementById('cor').value)" disabled="true">Reiniciar o jogo</button>
+                <!-- <button id='restart' onclick="restart()" disabled="true">Reiniciar o jogo</button> -->
                 <button id='open_instruction' onclick="openInstruction()">Visualizar instruções</button>
             </div>
 
@@ -92,7 +92,7 @@
                 <div id="form_zone">
                     Nick: <input type="text" id="nick" placeholder="nick..."> <br>
                     Password: <input type="password" id="password" placeholder="password..."> <br>
-                    <button onclick="register(document.getElementById('nick').value, document.getElementById('password').value)"> Login </button>
+                    <button onclick="game.playerStatus(document.getElementById('nick').value, document.getElementById('password').value)"> Login </button>
                 </div>
                 <div id="logged"></div>
             </div>
@@ -137,10 +137,7 @@
         </div>
     </div>
 
-    <script src="register.js"></script>
-    <script src="update.js"></script>
-    <script src="join.js"></script>
-
+    <script src="PlayerStatus.js"></script>
     <script src="Tabuleiro.js"></script>
     <script src="GameState.js"></script>
     <script src="GameAI.js"></script>
