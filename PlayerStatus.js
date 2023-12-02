@@ -55,7 +55,7 @@ class PlayerStatus {
         });
     }
 
-    notify(row, column, pieceId) { //nick password game move
+    notify(row, column) { //nick password game move
         const move = JSON.parse('{"row": ' + row + ', "column": ' + column + '}');
         
         fetch('http://twserver.alunos.dcc.fc.up.pt:8008/notify', {
@@ -108,23 +108,32 @@ class PlayerStatus {
                     started = false;
 
                 } else { //every time we make a move
-                    console.log(game.gameState.turn);
-                    for (let i=0; i<this.board.length; i++) {
-                        for (let j=0; j<this.board[0].length; j++) {
-                            if (data.board[i][j] != this.board[i][j]) {
-                                const peça = document.getElementById('j1' + piece).id;
-                                if(game.gameState.turn == 'j1')
-                                    document.getElementById('b' + (i + 1) + (j + 1)).appendChild(document.getElementById('j1' + piece));
-                                else    
-                                    document.getElementById('b' + (i + 1) + (j + 1)).appendChild(document.getElementById('j2' + piece));
-                                piece++;
+                    if(data.phase == 'drop') { //phase 1
+
+                        for (let i=0; i<this.board.length; i++) {
+                            for (let j=0; j<this.board[0].length; j++) {
+
+                                if (data.board[i][j] != this.board[i][j]) { //detects whre the piece was placed
+
+                                    if(!document.getElementById('b' + (i + 1) + (j + 1)).hasChildNodes()) { //continue if u are the player that was waitning for the play
+                                        game.gameState.tabuleiro[i+1][j+1] = game.gameState.turn;
+                                        document.getElementById('b' + (i + 1) + (j + 1)).appendChild(document.getElementById(game.gameState.turn + piece));
+
+                                        piece++;
+                                        game.gameState.switchTurn();
+                                        game.gameState.jogadas++;
+                                    }
+                                }
                             }
                         }
+                    } else if(data.phase == 'move') { //phase 2
+                        console.log(game.gameState.fase);
+                        console.log(this.board == data.board);
                     }
                 }
+
                 this.board = data.board;
                 
-            
             } else if ('winner' in data) { //end of game
 
                 if (data.winner == this.nick) {
@@ -137,6 +146,7 @@ class PlayerStatus {
                     disableButtons(true,true,false,false);
                     game.restore();
                 }
+                eventSource.close();
             }
         }
     }

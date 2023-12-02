@@ -105,7 +105,6 @@ function allowDrop(ev) {
 
 function drag(ev) {
     ev.dataTransfer.setData("text", ev.target.id);
-
 }
 
 function drop(ev) { //phase 1
@@ -150,8 +149,10 @@ function select(event) { //phase 2
             mensagem("Não pode mover um peça do oponente!");
 
         } else { //if is possible
+
+            game.login.notify(peça.parentNode.id.substring(1,2), peça.parentNode.id.substring(2,3));
+
             const possibleMovs = game.gameState.getAvailableMovementsPiece(peça.id.substring(0,2), peça.parentNode.id); //possible moves for the selected piece
-            console.log(peça.id, possibleMovs);
             for (let i=0; i<possibleMovs.length; i++) {
                 const bloco = document.getElementById(possibleMovs[i]);
                 changeBlockColor(bloco.id, 'green');
