@@ -2,16 +2,15 @@ class Game {
     constructor() {
         this.j1;
         this.j2;
+        this.intervalId;
         this.restore(this.j1,this.j2);
     }
 
     restore (j1, j2) {
-        if (j1 === undefined && j2 === undefined) {
+        if (j1 === undefined) {
 			this.j1 = "black";
             this.j2 = "white";
-        }
-
-        if (j1 === 'Preto') {
+        } else if (j1 === 'Preto') {
             this.j1 = "black";
             this.j2 = "white";
         } else if (j1 === 'Branco') {
@@ -19,13 +18,10 @@ class Game {
             this.j2 = "black";
         }
 
-		let colunas = parseInt(document.getElementById('comprimento').value);
-		let linhas = parseInt(document.getElementById('altura').value);
+        this.colunas = parseInt(document.getElementById('comprimento').value);
+        this.linhas = parseInt(document.getElementById('altura').value);
 
-        this.colunas = colunas;
-        this.linhas = linhas;
-
-        this.gameState = new GameState(linhas, colunas, (new Tabuleiro(linhas, colunas)).tabuleiro1);
+        this.gameState = new GameState(this.linhas, this.colunas, (new Tabuleiro(this.linhas, this.colunas)).tabuleiro1);
 
         this.fora_j1 = new Fora(true);
         this.fora_j2 = new Fora(false);
@@ -52,6 +48,7 @@ class Game {
         if(document.getElementById("ia").checked) { //we turn on the game
             this.turnOn(3);  
             this.gameState.turn = 'j1';
+            this.startTimer(2*60);
         }   
         else //we sent info to server
             this.login.join(parseInt(document.getElementById('altura').value), parseInt(document.getElementById('comprimento').value));
@@ -94,16 +91,15 @@ class Game {
 		}
     }
 
-    game_finished(){
-        let finished = this.gameState.game_finished();
-
-        console.log(this.againstAI)
-
+    game_finished(finished){
+        if(finished === undefined)
+            var finished = this.gameState.game_finished();
+        
         if (finished == 1){
             setTimeout(function() {
                 if (!this.againstAI) {
                     mensagem("O jogador 2 ganhou! Para jogar de novo reinicie o jogo.");
-                    fim_mensagem("Parabéns jogador 2, ganhaste!")
+                    fim_mensagem("Parabéns jogador 2, ganhaste!");
                 } else {
                     mensagem("A máquina ganhou! Para jogar de novo reinicie o jogo.");
                     fim_mensagem("A máquina ganhou!");
@@ -276,6 +272,43 @@ class Game {
             }
 
         }
+    }
+
+    startTimer(time) {
+        const timer = document.getElementById("timer");
+
+        clearInterval(this.intervalId);
+
+        this.intervalId = setInterval(() => {
+            var minutes = parseInt(time / 60, 10);
+            var seconds = parseInt(time % 60, 10);
+
+            if (minutes < 10) minutes = "0" + minutes;
+            if (seconds < 10) seconds = "0" + seconds;
+
+            timer.innerText = minutes + ":" + seconds;
+
+            if (--time < 0) {
+                if (this.gameState.turn == 'j1')
+                    this.game_finished(1);
+                else
+                    this.game_finished(2);
+
+                this.end_of_game();
+                openEnd();
+                this.stopTimer(); // Stop the timer when time reaches 0
+            }
+        }, 1000);
+    }
+
+    stopTimer() {
+        clearInterval(this.intervalId); // Clear the interval to stop the timer
+    }
+
+    // Method to reset the timer
+    resetTimer(initialTime) {
+        this.stopTimer(); // Stop the current timer
+        this.startTimer(initialTime); // Start a new timer with the initial time
     }
 
 }

@@ -274,3 +274,12 @@ input[type="radio"]:checked + label {
     background-color: #f2f2f2
   }
 
+#timer {
+    background-color: greenyellow;
+    color: black;
+    font-size:xx-large;
+    margin: 1%;
+    padding: 1%;
+    text-align: center;
+    line-height: 100%;
+}

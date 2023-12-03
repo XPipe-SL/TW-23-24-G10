@@ -116,8 +116,9 @@ function drop(ev) { //phase 1
         ev.target.appendChild(document.getElementById(data));
         const peça = document.getElementById(data);
         peça.draggable = false; //bloqueia a peça durnte a fase 1 após ser colocada no tabuleiro
-        if(!game.againstAI)
+        if(!game.againstAI) {
             game.login.notify(parseInt( alvoId.substring(1, 2)) - 1, parseInt(alvoId.substring(2,3)) - 1, data );
+        }
         mensagem('Movimento efetuado com sucesso!');
 
     } else if (data.substring(0,2) != game.gameState.turn) { //not is turn
@@ -149,8 +150,9 @@ function select(event) { //phase 2
             mensagem("Não pode mover um peça do oponente!");
 
         } else { //if is possible
-
-            game.login.notify(peça.parentNode.id.substring(1,2), peça.parentNode.id.substring(2,3));
+            if(!game.againstAI) {
+                game.login.notify(peça.parentNode.id.substring(1,2), peça.parentNode.id.substring(2,3));
+            }
 
             const possibleMovs = game.gameState.getAvailableMovementsPiece(peça.id.substring(0,2), peça.parentNode.id); //possible moves for the selected piece
             for (let i=0; i<possibleMovs.length; i++) {
