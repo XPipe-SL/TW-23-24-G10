@@ -2,7 +2,7 @@ class Game {
     constructor() {
         this.j1;
         this.j2;
-        this.intervalId;
+        this.timer = new Timer();
         this.restore(this.j1,this.j2);
     }
 
@@ -17,7 +17,7 @@ class Game {
             this.j1 = "white";
             this.j2 = "black";
         }
-
+        
         this.colunas = parseInt(document.getElementById('comprimento').value);
         this.linhas = parseInt(document.getElementById('altura').value);
 
@@ -45,10 +45,9 @@ class Game {
         this.restore(document.getElementById('cor').value);
         closeEnd();
         disableButtons(false,false,false,true);
-        if(document.getElementById("ia").checked) { //we turn on the game
+        if(this.againstAI) { //we turn on the game
             this.turnOn(3);  
             this.gameState.turn = 'j1';
-            this.startTimer(2*60);
         }   
         else //we sent info to server
             this.login.join(parseInt(document.getElementById('altura').value), parseInt(document.getElementById('comprimento').value));
@@ -59,11 +58,12 @@ class Game {
             if(turn == 1) this.gameState.turn = 'j1';
             else this.gameState.turn = 'j2';
         }
-  
         if(player == 1 || player == 3) 
             this.fora_j1.dragPieces('j1');
         if(player == 2 || player == 3) 
             this.fora_j2.dragPieces('j2');
+        this.timer.stop();
+        this.timer.start();
     }
 
     playerStatus(nick, password) {
@@ -74,29 +74,29 @@ class Game {
         for(var i=0; i<num_peças; i++) { 
             const peça1 = document.getElementById("j1" + (i + 1));
             const peça2 = document.getElementById("j2" + (i + 1));
-            peça1.draggable = false;
-            peça2.draggable = false;
-            peça1.setAttribute('ondrag', '');
-            peça2.setAttribute('ondrag', '');
+            peça1.removeAttribute('ondragstart');
+            peça1.removeAttribute('draggable');
             peça1.setAttribute("onclick", "select(event)");
+            peça2.removeAttribute('ondragstart');
+            peça2.removeAttribute('draggable');
             peça2.setAttribute("onclick", "select(event)");
         }
 
         for(var linha = 1; linha<=this.linhas; linha++) {
 			for(var coluna = 1; coluna<=this.colunas; coluna++) {
 				const bloco = document.getElementById("b"+linha+coluna);
-				bloco.setAttribute("ondrop", ""); 
-                bloco.setAttribute("ondragover", "");
+				bloco.removeAttribute("ondrop"); 
+                bloco.removeAttribute("ondragover");
 			}
 		}
     }
 
-    game_finished(finished){
-        if(finished === undefined)
+    game_finished(finished, time){
+        if (finished === undefined)
             var finished = this.gameState.game_finished();
         
         if (finished == 1){
-            setTimeout(function() {
+            setTimeout(() =>{
                 if (!this.againstAI) {
                     mensagem("O jogador 2 ganhou! Para jogar de novo reinicie o jogo.");
                     fim_mensagem("Parabéns jogador 2, ganhaste!");
@@ -105,32 +105,27 @@ class Game {
                     fim_mensagem("A máquina ganhou!");
                     this.update_classifications(this.j2);
                 }
+                this.timer.stop();
                 openEnd();
                 return true;
-            }, 2000);
+            }, time);
         }
-
+    
         if (finished == 2){
-            setTimeout(function() {
+            setTimeout(() => {
                 mensagem("O jogador 1 ganhou! Para jogar de novo reinicie o jogo.")
                 fim_mensagem("Parabéns jogador 1, ganhaste!")
                 this.update_classifications(this.j1);
+                this.timer.stop();
                 openEnd();
                 return true;
-            }, 2000);           
+            }, time);
         }
-
         return false;
     }
 
-    desistir() { 
-        for(var i=0; i<num_peças; i++){
-            const peçaj1 = document.getElementById("j1" + (i + 1));
-            const peçaj2 = document.getElementById("j2" + (i + 1));
-            peçaj1.setAttribute("draggable", "false");
-            peçaj2.setAttribute("draggable", "false");
-        }
-
+    desistir() {
+        this.timer.stop();
         if(this.againstAI) {
             mensagem("Você desistiu! Para jogar de novo submeta de novo");
             fim_mensagem("Você desistiu! \n" + "A máquina ganhou!");
@@ -138,17 +133,7 @@ class Game {
         } else {
             this.login.leave();
         }  
-    }
-
-    end_of_game(){
-        for(var i=0; i<num_peças; i++){
-            const peçaj1 = document.getElementById("j1" + (i + 1));
-            const peçaj2 = document.getElementById("j2" + (i + 1));
-            peçaj1.setAttribute("draggable", "false");
-            peçaj2.setAttribute("draggable", "false");
-        }
-
-    }
+    }   
 
     update_classifications(name){
         var points = Math.abs(this.gameState.peças_j1-this.gameState.peças_j2);
@@ -259,56 +244,17 @@ class Game {
                 changeBlockColor(movement[2], 'yellow', 1500);
                 changeBlockColor(movement[1], 'green', 1500);
                 mensagem("A AI fez uma linha, movendo do bloco amarelo para o verde.");
-                setTimeout(function() {
+                setTimeout(() => {
                     document.getElementById( "fora2" ).appendChild( document.getElementById(movement[3]).firstChild );~
                     changeBlockColor(movement[3], 'red');
                     mensagem('A AI removeu uma peça sua.');
+                    this.timer.stop();
+                    this.timer.start();
                 }, 1500);
                 //mensagem("A AI fez linha movendo a peça da posição (" + movement[2].substring(1,2) + "," + movement[2].substring(2,3) + ") para ("+ movement[1].substring(1,2) + "," +  movement[1].substring(2,3) + ") e removeu uma peça da posição (" + movement[3].substring(1,2) + "," +  movement[3].substring(2,3) + ").");
-                
-
-                
-
             }
 
         }
-    }
-
-    startTimer(time) {
-        const timer = document.getElementById("timer");
-
-        clearInterval(this.intervalId);
-
-        this.intervalId = setInterval(() => {
-            var minutes = parseInt(time / 60, 10);
-            var seconds = parseInt(time % 60, 10);
-
-            if (minutes < 10) minutes = "0" + minutes;
-            if (seconds < 10) seconds = "0" + seconds;
-
-            timer.innerText = minutes + ":" + seconds;
-
-            if (--time < 0) {
-                if (this.gameState.turn == 'j1')
-                    this.game_finished(1);
-                else
-                    this.game_finished(2);
-
-                this.end_of_game();
-                openEnd();
-                this.stopTimer(); // Stop the timer when time reaches 0
-            }
-        }, 1000);
-    }
-
-    stopTimer() {
-        clearInterval(this.intervalId); // Clear the interval to stop the timer
-    }
-
-    // Method to reset the timer
-    resetTimer(initialTime) {
-        this.stopTimer(); // Stop the current timer
-        this.startTimer(initialTime); // Start a new timer with the initial time
     }
 
 }

@@ -138,9 +138,11 @@ class PlayerStatus {
 
                 if (data.winner == this.nick) {
                     fim_mensagem('Você ganhou!');
+                    game.timer.stop();
                     openEnd();                   
                 } else if (data.winner == this.oponnent && this.oponnent != null) {
                     fim_mensagem(this.oponnent + ' ganhou!');
+                    game.timer.stop();
                     openEnd();
                 } else { //not joinned
                     disableButtons(true,true,false,false);

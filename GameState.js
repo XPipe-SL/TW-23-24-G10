@@ -58,7 +58,8 @@ class GameState{
     switchTurn() {
         if(this.turn == 'j1') this.turn = 'j2';
         else this.turn = 'j1';
-        if(!game.againstAI || this.turn == 'j1') game.resetTimer(2*60);
+        game.timer.stop();
+        game.timer.start();
     }
 
     fez_linha(jogador, linha, coluna) { //checks if the player made a line
