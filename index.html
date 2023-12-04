@@ -55,8 +55,10 @@
         </div>
 
         <div class = "main" id="main">
+            <div id="timer">02:00</div>
             <div id="above_tab">
-                <button id='restart' onclick="closeEnd(document.getElementById('cor').value)">Reiniciar o jogo</button>
+                
+                <!-- <button id='restart' onclick="restart()" disabled="true">Reiniciar o jogo</button> -->
                 <button id='open_instruction' onclick="openInstruction()">Visualizar instruções</button>
             </div>
 
@@ -66,11 +68,11 @@
 
             <div class="tab_main" id="tab_main" >
                 
-                <div class="fora j1" id="fora1" ondrop="drop(event)" ondragover="allowDrop(event)"></div> <!-- lugar para as peças na esquerda -->
+                <div class="fora j1" id="fora1"></div> <!--lugar para as peças na esquerda -->
 
                 <div class="tabuleiro" id="tab"></div> <!-- Tabuleiro central -->
 
-                <div class="fora j2" id="fora2" ondrop="drop(event)" ondragover="allowDrop(event)"></div> <!-- lugar para as peças na direita -->
+                <div class="fora j2" id="fora2"></div>  <!--lugar para as peças na direita -->
             </div>
 
             <div id="mensagens">
@@ -78,8 +80,8 @@
             </div>
 
             <div id="below_tab">
-                <button id="give_up" onclick="game.desistir()">Desistir do jogo</button>
-                <button onclick="openClassificações()">Visualizar classificações</button>
+                <button id="give_up" onclick="game.desistir()" disabled="true">Desistir do jogo</button>
+                <button id="see_scoreboard" onclick="openClassificações()" disabled="true">Visualizar classificações</button>
             </div>   
         </div>
 
@@ -89,9 +91,12 @@
             </div>
                 
             <div class="login">
-                    Username: <input type="text" id="username"> <br>
-                    Password: <input type="password" id="password">
-                    <button> Submeter </button>
+                <div id="form_zone">
+                    Nick: <input type="text" id="nick" placeholder="nick..."> <br>
+                    Password: <input type="password" id="password" placeholder="password..."> <br>
+                    <button onclick="game.playerStatus(document.getElementById('nick').value, document.getElementById('password').value)"> Login </button>
+                </div>
+                <div id="logged"></div>
             </div>
 
             <div class="options">
@@ -122,18 +127,27 @@
                         <option>Branco</option>
                     </select> <br><br>
                     Nível de AI:   
-                    <select size="1" name="nivel">
+                    <select size="1" name="nivel" id="nivel">
                         <option>Principiante</option>
                         <option>Amador</option>
                         <option>Profissional</option>
                     </select> <br><br>
-                    <button onclick="game.restore(document.getElementById('cor').value)" >Submeter</button>
+                    <button id='submit' onclick="game.submitChanges()" disabled="true">Submeter</button>
                     
                 
             </div>
         </div>
     </div>
+
+    <script src="PlayerStatus.js"></script>
+    <script src="Timer.js"></script>
+    <script src="Tabuleiro.js"></script>
+    <script src="GameState.js"></script>
+    <script src="GameAI.js"></script>
+    <script src="Fora.js"></script>
+    <script src="Game.js"></script>
     <script src="script.js"></script>
+
 </body>
 
 </html>
