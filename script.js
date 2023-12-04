@@ -112,20 +112,23 @@ function drop(ev) { //phase 1
     var data = ev.dataTransfer.getData("text");
     var alvoId = ev.target.id;
 
-    if (alvoId.substring(0,1) != "j" && game.gameState.colocar_peça(data, alvoId)){ 
+    if (!document.getElementById(data).draggable) //can't move a piece already in the board
+        mensagem('Não pode mover uma peça já posta no tabuleiro.');
+
+    else if (data.substring(0,2) != "j1") //not j1 piece
+        mensagem("Não pode mover uma peça do oponente!");
+
+    else if (game.gameState.turn != "j1") // Not j1 turn
+        mensagem("Espere pela sua vez!");
+
+    else if (alvoId.substring(0,1) != "j" && game.gameState.colocar_peça(data, alvoId)){ 
         ev.target.appendChild(document.getElementById(data));
         const peça = document.getElementById(data);
         peça.draggable = false; //bloqueia a peça durnte a fase 1 após ser colocada no tabuleiro
         if(!game.againstAI) {
             game.login.notify(parseInt( alvoId.substring(1, 2)) - 1, parseInt(alvoId.substring(2,3)) - 1, data );
         }
-        mensagem('Movimento efetuado com sucesso!');
-
-    } else if (data.substring(0,2) != game.gameState.turn) { //not is turn
-        mensagem("Não pode mover uma peça do oponente!");
-
-    } else if (!document.getElementById(data).draggable) { //can't move a piece already in the board
-        mensagem('Não pode mover uma peça já posta no tabuleiro.');        
+        mensagem('Movimento efetuado com sucesso!');   
 
     } else { mensagem("Jogada inválida!");} //non valid play
 

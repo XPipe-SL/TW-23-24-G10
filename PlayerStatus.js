@@ -93,7 +93,12 @@ class PlayerStatus {
                             this.oponnent = names;        
                     }
 
-                    if(data.players[this.nick] == 'black') {
+                    if (data.turn == this.nick)
+                        game.turnOn(3,1);
+                    else
+                        game.turnOn(3,2);
+
+                    /*if(data.players[this.nick] == 'black') {
                         if(data.turn == this.nick)
                             game.turnOn(1, 1);
                         else
@@ -104,7 +109,7 @@ class PlayerStatus {
                             game.turnOn(2, 2);
                         else
                             game.turnOn(2, 1);
-                    }
+                    }*/
                     started = false;
 
                 } else { //every time we make a move
