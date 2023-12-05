@@ -98,18 +98,6 @@ class PlayerStatus {
                     else
                         game.turnOn(3,2);
 
-                    /*if(data.players[this.nick] == 'black') {
-                        if(data.turn == this.nick)
-                            game.turnOn(1, 1);
-                        else
-                            game.turnOn(1,2);
-                    }
-                    if(data.players[this.nick] == 'white') {
-                        if(data.turn == this.nick)
-                            game.turnOn(2, 2);
-                        else
-                            game.turnOn(2, 1);
-                    }*/
                     started = false;
 
                 } else { //every time we make a move
@@ -139,7 +127,18 @@ class PlayerStatus {
                     } else if(data.phase == 'move') { //phase 2
                         if (data.turn == this.oponnent) {
                             if (data.step == 'from') {
-                                console.log(data);
+                                //console.log(data);
+                            }
+
+                            // Contains piece slected by the other player
+                            if (data.step == 'to') {
+                                let blocoId = 'b'+(data.move.row+1)+(data.move.column+1);
+                                changeBlockColor(blocoId, 'yellow');
+                                mensagem(this.oponnent + " selecionou a peça do bloco amarelo.");
+                            }
+
+                            if (data.step == 'take') {
+
                             }
                         }
                     }

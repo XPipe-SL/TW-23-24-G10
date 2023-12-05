@@ -126,7 +126,7 @@ function drop(ev) { //phase 1
         const peça = document.getElementById(data);
         peça.draggable = false; //bloqueia a peça durnte a fase 1 após ser colocada no tabuleiro
         if(!game.againstAI) {
-            game.login.notify(parseInt( alvoId.substring(1, 2)) - 1, parseInt(alvoId.substring(2,3)) - 1, data );
+            game.login.notify(parseInt( alvoId.substring(1, 2)) - 1, parseInt(alvoId.substring(2,3)) - 1);
         }
         mensagem('Movimento efetuado com sucesso!');   
 
@@ -148,15 +148,18 @@ function select(event) { //phase 2
     const peça = event.target;
     if(!game.gameState.piece_to_remove) { //no piece to remove
 
-        if (peça.parentNode.id.substring(0,4) == 'fora'){ //if the piece is outside
+        if (peça.parentNode.id.substring(0,4) == 'fora') //if the piece is outside
             mensagem("Não pode mover uma peça já removida do tabuleiro.");
 
-        } else if (peça.id.substring(0,2) != game.gameState.turn) { //if not his turn
-            mensagem("Não pode mover um peça do oponente!");
+        else if (peça.id.substring(0,2) != "j1") //not j1 piece
+            mensagem("Não pode mover uma peça do oponente!");
+
+        else if (game.gameState.turn != "j1") { //if not j1 turn
+            mensagem("Espere pela sua vez!");
 
         } else { //if is possible
             if(!game.againstAI) {
-                game.login.notify(peça.parentNode.id.substring(1,2), peça.parentNode.id.substring(2,3));
+                game.login.notify(peça.parentNode.id.substring(1,2)-1, peça.parentNode.id.substring(2,3)-1);
             }
 
             const possibleMovs = game.gameState.getAvailableMovementsPiece(peça.id.substring(0,2), peça.parentNode.id); //possible moves for the selected piece
@@ -186,6 +189,10 @@ function move(event, peçaId) { //phase 2
     if (game.gameState.mover_peça(blocoOrigem.id, blocoAlvo.id)) {
         blocoAlvo.appendChild(document.getElementById(peçaId));
         mensagem('Movimento efetuado com sucesso!');
+        if (!game.againstAI) {
+            game.login.notify(blocoOrigem.id.substring(1,2)-1, blocoOrigem.id.substring(2,3)-1);
+        }
+
         resetBlocos();
         if (game.gameState.piece_to_remove) { // if there is a piece to remove, waits until the piece is removed
             mensagem('Fez uma linha, tem de remover uma peça do adversário.');
