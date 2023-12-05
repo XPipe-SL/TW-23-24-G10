@@ -135,7 +135,7 @@ function drop(ev) { //phase 1
     if (game.againstAI && game.gameState.turn == "j2") //ai next step
         game.AInextStep();
 
-    if(game.gameState.isNextFase()) { //checks next fase
+    if(game.gameState.fase == 2) { //checks next fase
         game.game_finished(undefined, 1500); //if there is no option to move piece after drop phase
         game.mudança();
     }

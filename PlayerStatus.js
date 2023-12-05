@@ -113,7 +113,7 @@ class PlayerStatus {
                     started = false;
 
                 } else { //every time we make a move
-                    if(data.phase == 'drop') { //phase 1
+                    if((data.phase == 'drop') || (data.phase == 'move' && game.gameState.fase == 1)) { //phase 1
 
                         for (let i=0; i<this.board.length; i++) {
                             for (let j=0; j<this.board[0].length; j++) {
@@ -126,14 +126,22 @@ class PlayerStatus {
 
                                         piece++;
                                         game.gameState.switchTurn();
-                                        game.gameState.jogadas++;
                                     }
                                 }
                             }
                         }
+
+                        // Phase change handling
+                        if (data.phase == 'move') {
+                            game.mudança();
+                        }
+
                     } else if(data.phase == 'move') { //phase 2
-                        console.log(game.gameState.fase);
-                        console.log(this.board == data.board);
+                        if (data.turn == this.oponnent) {
+                            if (data.step == 'from') {
+                                console.log(data);
+                            }
+                        }
                     }
                 }
 
