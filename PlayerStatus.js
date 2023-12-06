@@ -65,13 +65,14 @@ class PlayerStatus {
         })
         .then((response) => {
             if (response.ok) {
-                return response.text();
+                return response.json().then(data => {
+                    console.log(data);
+                })
             } else {
-                throw new Error('notify: ups');
+                return response.json().then(data => {
+                    console.log('error:', data);
+                })
             }
-        })
-        .then((data) => {
-            console.log(data);
         })
     }
 
@@ -80,6 +81,8 @@ class PlayerStatus {
         const eventSource = new EventSource(url);
         var started = true;
         var piece = 1;
+        var lastBlockId;
+        var lastStep;
         eventSource.onmessage = (event) => {
             const data = JSON.parse(event.data);
             console.log(data);
@@ -93,42 +96,74 @@ class PlayerStatus {
                             this.oponnent = names;        
                     }
 
-                    if(data.players[this.nick] == 'black') {
-                        if(data.turn == this.nick)
-                            game.turnOn(1, 1);
-                        else
-                            game.turnOn(1,2);
-                    }
-                    if(data.players[this.nick] == 'white') {
-                        if(data.turn == this.nick)
-                            game.turnOn(2, 2);
-                        else
-                            game.turnOn(2, 1);
-                    }
+                    if (data.turn == this.nick)
+                        game.turnOn(3,1);
+                    else
+                        game.turnOn(3,2);
+
                     started = false;
 
                 } else { //every time we make a move
-                    if(data.phase == 'drop') { //phase 1
+                    if((data.phase == 'drop') || (data.phase == 'move' && game.gameState.fase == 1)) { //phase 1
 
-                        for (let i=0; i<this.board.length; i++) {
-                            for (let j=0; j<this.board[0].length; j++) {
+                        let row = data.move.row + 1;
+                        let column = data.move.column + 1;
 
-                                if (data.board[i][j] != this.board[i][j]) { //detects whre the piece was placed
-
-                                    if(!document.getElementById('b' + (i + 1) + (j + 1)).hasChildNodes()) { //continue if u are the player that was waitning for the play
-                                        game.gameState.tabuleiro[i+1][j+1] = game.gameState.turn;
-                                        document.getElementById('b' + (i + 1) + (j + 1)).appendChild(document.getElementById(game.gameState.turn + piece));
-
-                                        piece++;
-                                        game.gameState.switchTurn();
-                                        game.gameState.jogadas++;
-                                    }
-                                }
-                            }
+                        if (!document.getElementById('b' + row + column).hasChildNodes()) {
+                            game.gameState.tabuleiro[row][column] = game.gameState.turn;
+                            document.getElementById('b' + row + column).appendChild(document.getElementById(game.gameState.turn + piece));
+                            piece++;
+                            game.gameState.switchTurn();
                         }
+                    
+                        // Phase change handling
+                        if (data.phase == 'move') {
+                            game.mudança();
+                        }
+
                     } else if(data.phase == 'move') { //phase 2
-                        console.log(game.gameState.fase);
-                        console.log(this.board == data.board);
+                        if (data.step == 'from') {
+                            let block = document.getElementById('b' + (data.move.row + 1) + (data.move.column + 1));
+
+                            if (!block.hasChildNodes()) {
+                                console.log('last:' + lastBlockId); 
+                                let lastBlock = document.getElementById(lastBlockId);
+                                changeBlockColor(lastBlock.id, 'yellow');
+                                block.appendChild( lastBlock.childNodes[0]);
+                                changeBlockColor(block.id, 'green');
+                                game.gameState.switchTurn();
+                            }
+
+                            lastStep = data.step;
+                        }
+
+                        // Contains piece slected by the other player
+                        if (data.step == 'to') {
+                            if(lastStep == 'take') {
+                                let block = document.getElementById('b' + (data.move.row + 1) + (data.move.column + 1));
+                                if (block.hasChildNodes()) {
+                                    document.getElementById('fora2').appendChild(block.childNodes[0]);
+                                }
+                            } else if (lastStep == 'from')
+                                lastBlockId = 'b' + (data.move.row + 1) + (data.move.column + 1);       
+                                
+                            lastStep = data.step;
+                        }
+
+                        if (data.step == 'take') {
+
+                            if (!block.hasChildNodes()) {
+                                console.log('last:' + lastBlockId); 
+                                let lastBlock = document.getElementById(lastBlockId);
+                                changeBlockColor(lastBlock.id, 'yellow');
+                                block.appendChild( lastBlock.childNodes[0]);
+                                changeBlockColor(block.id, 'green');
+                                game.gameState.switchTurn();
+                            }
+
+                            lastStep = data.step;
+                        }
+                        
                     }
                 }
 
@@ -149,6 +184,8 @@ class PlayerStatus {
                     game.restore();
                 }
                 eventSource.close();
+            } else if ('error' in data) {
+                console.log
             }
         }
     }

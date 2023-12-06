@@ -112,27 +112,30 @@ function drop(ev) { //phase 1
     var data = ev.dataTransfer.getData("text");
     var alvoId = ev.target.id;
 
-    if (alvoId.substring(0,1) != "j" && game.gameState.colocar_peça(data, alvoId)){ 
+    if (!document.getElementById(data).draggable) //can't move a piece already in the board
+        mensagem('Não pode mover uma peça já posta no tabuleiro.');
+
+    else if (data.substring(0,2) != "j1") //not j1 piece
+        mensagem("Não pode mover uma peça do oponente!");
+
+    else if (game.gameState.turn != "j1") // Not j1 turn
+        mensagem("Espere pela sua vez!");
+
+    else if (alvoId.substring(0,1) != "j" && game.gameState.colocar_peça(data, alvoId)){ 
         ev.target.appendChild(document.getElementById(data));
         const peça = document.getElementById(data);
         peça.draggable = false; //bloqueia a peça durnte a fase 1 após ser colocada no tabuleiro
         if(!game.againstAI) {
-            game.login.notify(parseInt( alvoId.substring(1, 2)) - 1, parseInt(alvoId.substring(2,3)) - 1, data );
+            game.login.notify(parseInt( alvoId.substring(1, 2)) - 1, parseInt(alvoId.substring(2,3)) - 1);
         }
-        mensagem('Movimento efetuado com sucesso!');
-
-    } else if (data.substring(0,2) != game.gameState.turn) { //not is turn
-        mensagem("Não pode mover uma peça do oponente!");
-
-    } else if (!document.getElementById(data).draggable) { //can't move a piece already in the board
-        mensagem('Não pode mover uma peça já posta no tabuleiro.');        
+        mensagem('Movimento efetuado com sucesso!');   
 
     } else { mensagem("Jogada inválida!");} //non valid play
 
     if (game.againstAI && game.gameState.turn == "j2") //ai next step
         game.AInextStep();
 
-    if(game.gameState.isNextFase()) { //checks next fase
+    if(game.gameState.fase == 2) { //checks next fase
         game.game_finished(undefined, 1500); //if there is no option to move piece after drop phase
         game.mudança();
     }
@@ -145,17 +148,20 @@ function select(event) { //phase 2
     const peça = event.target;
     if(!game.gameState.piece_to_remove) { //no piece to remove
 
-        if (peça.parentNode.id.substring(0,4) == 'fora'){ //if the piece is outside
+        if (peça.parentNode.id.substring(0,4) == 'fora') //if the piece is outside
             mensagem("Não pode mover uma peça já removida do tabuleiro.");
 
-        } else if (peça.id.substring(0,2) != game.gameState.turn) { //if not his turn
-            mensagem("Não pode mover um peça do oponente!");
+        else if (peça.id.substring(0,2) != "j1") //not j1 piece
+            mensagem("Não pode mover uma peça do oponente!");
+
+        else if (game.gameState.turn != "j1") { //if not j1 turn
+            mensagem("Espere pela sua vez!");
 
         } else { //if is possible
             if(!game.againstAI) {
-                game.login.notify(peça.parentNode.id.substring(1,2), peça.parentNode.id.substring(2,3));
+                game.login.notify(peça.parentNode.id.substring(1,2)-1, peça.parentNode.id.substring(2,3)-1);
             }
-
+            changeBlockColor(peça.parentNode.id, 'yellow');
             const possibleMovs = game.gameState.getAvailableMovementsPiece(peça.id.substring(0,2), peça.parentNode.id); //possible moves for the selected piece
             for (let i=0; i<possibleMovs.length; i++) {
                 const bloco = document.getElementById(possibleMovs[i]);
@@ -183,6 +189,10 @@ function move(event, peçaId) { //phase 2
     if (game.gameState.mover_peça(blocoOrigem.id, blocoAlvo.id)) {
         blocoAlvo.appendChild(document.getElementById(peçaId));
         mensagem('Movimento efetuado com sucesso!');
+        if (!game.againstAI) {
+            game.login.notify(blocoAlvo.id.substring(1,2)-1, blocoAlvo.id.substring(2,3)-1);
+        }
+
         resetBlocos();
         if (game.gameState.piece_to_remove) { // if there is a piece to remove, waits until the piece is removed
             mensagem('Fez uma linha, tem de remover uma peça do adversário.');

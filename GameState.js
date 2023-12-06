@@ -60,6 +60,12 @@ class GameState{
         else this.turn = 'j1';
         game.timer.stop();
         game.timer.start();
+        this.jogadas++;
+
+        // Phase change handling
+        if (this.isNextFase()){
+            this.fase++;
+        }
     }
 
     fez_linha(jogador, linha, coluna) { //checks if the player made a line
@@ -130,11 +136,8 @@ class GameState{
 		    if(this.possivel_colocar(jogador,linha,coluna)){ //jogada válida                
                 this.tabuleiro[linha][coluna] = jogador; //coloca a peça no array tabuleiro
 
-                this.jogadas++;
                 this.switchTurn();
 
-                if (this.isNextFase()) this.fase++;
-                if (this.fase>2) alert("oopsie");
                 return true;
             }
         } 
@@ -229,7 +232,6 @@ class GameState{
                 }
 
                 if (!this.piece_to_remove) {
-                    this.jogadas++;
                     this.switchTurn();
                 }
 
@@ -415,7 +417,6 @@ class GameState{
             this.piece_to_remove = false;
             if (peça_removida == "j1") {this.peças_j1-=1;}
             else{ this.peças_j2 -=1;}
-            this.jogadas++;
             this.switchTurn();
             return true;
         }
