@@ -161,7 +161,7 @@ function select(event) { //phase 2
             if(!game.againstAI) {
                 game.login.notify(peça.parentNode.id.substring(1,2)-1, peça.parentNode.id.substring(2,3)-1);
             }
-
+            changeBlockColor(peça.parentNode.id, 'yellow');
             const possibleMovs = game.gameState.getAvailableMovementsPiece(peça.id.substring(0,2), peça.parentNode.id); //possible moves for the selected piece
             for (let i=0; i<possibleMovs.length; i++) {
                 const bloco = document.getElementById(possibleMovs[i]);
@@ -170,14 +170,27 @@ function select(event) { //phase 2
             }
         }       
     } else { //remove a piece
-        if (peça.id.substring(0,2) == 'j1') {var fora = document.getElementById('fora2');} else {var fora = document.getElementById('fora1');} 
-        if (game.gameState.remover_peça(peça.parentNode.id)) { 
-            fora.appendChild(peça);
-            peça.setAttribute('onclick','');
-            mensagem("Peça removida com sucesso!");
-            proceedPhase2();
-        } else {
+        if (game.gameState.turn != "j1")
+            mensagem("Espere pela sua vez!");
+        else if (peça.id.substring(0,2) != "j2") //not jj piece
             mensagem("Tem de retirar uma peça do adversário para o seu espaço.");
+        if (peça.parentNode.id.substring(0,4) == 'fora') //if the piece is outside
+            mensagem("Não pode remover uma peça já removida do tabuleiro.");
+        else {
+            if (peça.id.substring(0,2) == 'j1') {var fora = document.getElementById('fora2');} else {var fora = document.getElementById('fora1');} 
+            if (game.gameState.remover_peça(peça.parentNode.id)) {
+                if (!game.againstAI) {
+                    game.login.notify(peça.parentNode.id.substring(1,2)-1, peça.parentNode.id.substring(2,3)-1);
+                }
+
+                fora.appendChild(peça);
+                peça.setAttribute('onclick','');
+                mensagem("Peça removida com sucesso!");
+    
+                proceedPhase2();
+            } else {
+                mensagem("Tem de retirar uma peça do adversário para o seu espaço.");
+            }
         }
     }
 }
@@ -190,7 +203,7 @@ function move(event, peçaId) { //phase 2
         blocoAlvo.appendChild(document.getElementById(peçaId));
         mensagem('Movimento efetuado com sucesso!');
         if (!game.againstAI) {
-            game.login.notify(blocoOrigem.id.substring(1,2)-1, blocoOrigem.id.substring(2,3)-1);
+            game.login.notify(blocoAlvo.id.substring(1,2)-1, blocoAlvo.id.substring(2,3)-1);
         }
 
         resetBlocos();

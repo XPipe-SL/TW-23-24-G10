@@ -65,9 +65,13 @@ class PlayerStatus {
         })
         .then((response) => {
             if (response.ok) {
-                return response.text();
+                return response.json().then(data => {
+                    console.log(data);
+                })
             } else {
-                throw new Error('notify: ups');
+                return response.json().then(data => {
+                    console.log('error:', data);
+                })
             }
         })
         .then((data) => {
@@ -78,15 +82,20 @@ class PlayerStatus {
     update() { //nick game
         const url = 'http://twserver.alunos.dcc.fc.up.pt:8008/update?nick=' + encodeURIComponent(this.nick) + '&game=' + encodeURIComponent(this.game);
         const eventSource = new EventSource(url);
-        var started = true;
+        var searching = true;
         var piece = 1;
+        var fromrow;
+        var fromcolumn;
+        var pieceMoved=false;
+        var pieceRemoved=false;
+
         eventSource.onmessage = (event) => {
             const data = JSON.parse(event.data);
             console.log(data);
             
             if('board' in data) { //game starts
                 
-                if(started) { //when game is finded
+                if(searching) { //when game is found
 
                     for (let names in data.players) {
                         if (names != this.nick)
@@ -98,25 +107,19 @@ class PlayerStatus {
                     else
                         game.turnOn(3,2);
 
-                    started = false;
+                    searching = false;
 
                 } else { //every time we make a move
                     if((data.phase == 'drop') || (data.phase == 'move' && game.gameState.fase == 1)) { //phase 1
 
-                        for (let i=0; i<this.board.length; i++) {
-                            for (let j=0; j<this.board[0].length; j++) {
+                        let row = data.move.row + 1;
+                        let column = data.move.column + 1;
 
-                                if (data.board[i][j] != this.board[i][j]) { //detects whre the piece was placed
-
-                                    if(!document.getElementById('b' + (i + 1) + (j + 1)).hasChildNodes()) { //continue if u are the player that was waitning for the play
-                                        game.gameState.tabuleiro[i+1][j+1] = game.gameState.turn;
-                                        document.getElementById('b' + (i + 1) + (j + 1)).appendChild(document.getElementById(game.gameState.turn + piece));
-
-                                        piece++;
-                                        game.gameState.switchTurn();
-                                    }
-                                }
-                            }
+                        if (!document.getElementById('b' + row + column).hasChildNodes()) {
+                            game.gameState.tabuleiro[row][column] = game.gameState.turn;
+                            document.getElementById('b' + row + column).appendChild(document.getElementById(game.gameState.turn + piece));
+                            piece++;
+                            game.gameState.switchTurn();
                         }
 
                         // Phase change handling
@@ -124,21 +127,62 @@ class PlayerStatus {
                             game.mudança();
                         }
 
-                    } else if(data.phase == 'move') { //phase 2
-                        if (data.turn == this.oponnent) {
-                            if (data.step == 'from') {
-                                //console.log(data);
-                            }
+                    } else if (data.phase == 'move') { //phase 2
+                        if (pieceMoved) {
+                            // Update data
+                            let torow = data.move.row+1;
+                            let tocolumn = data.move.column+1;
 
-                            // Contains piece slected by the other player
+                            game.gameState.tabuleiro[fromrow][fromcolumn] = undefined;
+                            game.gameState.tabuleiro[torow][tocolumn] = 'j2';
+
+                            let toblocoId = 'b'+torow+tocolumn;
+                            let fromblocoId = 'b'+fromrow+fromcolumn;
+                            let peça = document.getElementById(fromblocoId).firstChild;
+                            changeBlockColor(toblocoId, 'green');
+                            mensagem(this.oponnent + " moveu a peça do bloco amarelo para o verde.");
+
+                            document.getElementById(toblocoId).appendChild(peça);
+                            pieceMoved = false;
+                        }
+
+                        if (data.turn == this.nick) {
+                            if (data.step == 'from') {
+                                // If the other player removed our piece
+                                if (pieceRemoved) {
+                                    let removeRow = data.move.row+1;
+                                    let removeColumn = data.move.column+1;
+                                    let removeblocoId = 'b'+removeRow+removeColumn;
+                                    let peça = document.getElementById(removeblocoId).firstChild;
+                                    changeBlockColor(removeblocoId, 'red');
+                                    mensagem(this.oponnent + " removeu uma peça sua.");
+
+                                    document.getElementById( "fora2" ).appendChild( peça );
+                                    game.gameState.tabuleiro[removeRow][removeColumn] = undefined;
+                                    game.gameState.peças_j1--;
+                                    pieceRemoved = false;
+                                }
+
+                                game.gameState.switchTurn();
+                            }
+                        }
+
+                        if (data.turn == this.oponnent) {
+
+                            // The other player is selecting
                             if (data.step == 'to') {
-                                let blocoId = 'b'+(data.move.row+1)+(data.move.column+1);
+                                fromrow = data.move.row+1;
+                                fromcolumn = data.move.column+1;
+                                let blocoId = 'b'+fromrow+fromcolumn;
                                 changeBlockColor(blocoId, 'yellow');
                                 mensagem(this.oponnent + " selecionou a peça do bloco amarelo.");
+                                pieceMoved = true; 
                             }
 
+                            // The other player has moved, and has taken our piece
                             if (data.step == 'take') {
-
+                                mensagem(this.oponnent + " fez uma linha, movendo do bloco amarelo para o verde.");
+                                pieceRemoved = true;
                             }
                         }
                     }
@@ -161,6 +205,8 @@ class PlayerStatus {
                     game.restore();
                 }
                 eventSource.close();
+            } else if ('error' in data) {
+                console.log;
             }
         }
     }

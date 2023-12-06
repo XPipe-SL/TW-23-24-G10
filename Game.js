@@ -245,7 +245,7 @@ class Game {
                 changeBlockColor(movement[1], 'green', 1500);
                 mensagem("A AI fez uma linha, movendo do bloco amarelo para o verde.");
                 setTimeout(() => {
-                    document.getElementById( "fora2" ).appendChild( document.getElementById(movement[3]).firstChild );~
+                    document.getElementById( "fora2" ).appendChild( document.getElementById(movement[3]).firstChild );
                     changeBlockColor(movement[3], 'red');
                     mensagem('A AI removeu uma peça sua.');
                     this.timer.stop();
