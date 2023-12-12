@@ -1,5 +1,7 @@
 const num_peças =12 ;
 //https://www.youtube.com/watch?v=k1kC8b6t2kg
+var selected = false;
+var lastSelected = [0,0];
 
 function disableButtons(giveUp, seeScoreBoard, instruction, submit) { //true -> button you want to disable
     document.getElementById('give_up').disabled = giveUp;
@@ -158,9 +160,18 @@ function select(event) { //phase 2
             mensagem("Espere pela sua vez!");
 
         } else { //if is possible
-            if(!game.againstAI) {
-                game.login.notify(peça.parentNode.id.substring(1,2)-1, peça.parentNode.id.substring(2,3)-1);
+
+            if(selected) {//if already selected a piece before
+                console.log(lastSelected[0] + ' ' +  lastSelected[1]);
+                game.login.notify(lastSelected[0], lastSelected[1]); //send again to revert
+
+                changeBlockColor('b' + (lastSelected[0] + 1) + (lastSelected[1] + 1), 'dimgray');
             }
+
+            if(!game.againstAI) { //send the block i really want to send
+                game.login.notify(peça.parentNode.id.substring(1,2)-1, peça.parentNode.id.substring(2,3)-1); //send the rigth piece to move
+            }
+
             changeBlockColor(peça.parentNode.id, 'yellow');
             const possibleMovs = game.gameState.getAvailableMovementsPiece(peça.id.substring(0,2), peça.parentNode.id); //possible moves for the selected piece
             for (let i=0; i<possibleMovs.length; i++) {
@@ -168,16 +179,31 @@ function select(event) { //phase 2
                 changeBlockColor(bloco.id, 'green');
                 bloco.setAttribute('onclick', 'move(event,"' + peça.id + '")');
             }
+
+            selected = true;
+            lastSelected = [peça.parentNode.id.substring(1,2)-1, peça.parentNode.id.substring(2,3)-1];
         }       
     } else { //remove a piece
-        if (peça.id.substring(0,2) == 'j1') {var fora = document.getElementById('fora2');} else {var fora = document.getElementById('fora1');} 
-        if (game.gameState.remover_peça(peça.parentNode.id)) { 
-            fora.appendChild(peça);
-            peça.setAttribute('onclick','');
-            mensagem("Peça removida com sucesso!");
-            proceedPhase2();
-        } else {
+        if (game.gameState.turn != "j1")
+            mensagem("Espere pela sua vez!");
+        else if (peça.id.substring(0,2) != "j2") //not jj piece
             mensagem("Tem de retirar uma peça do adversário para o seu espaço.");
+        if (peça.parentNode.id.substring(0,4) == 'fora') //if the piece is outside
+            mensagem("Não pode remover uma peça já removida do tabuleiro.");
+        else {
+            if (peça.id.substring(0,2) == 'j1') {var fora = document.getElementById('fora2');} else {var fora = document.getElementById('fora1');} 
+            if (game.gameState.remover_peça(peça.parentNode.id)) {
+                if (!game.againstAI) {
+                    game.login.notify(peça.parentNode.id.substring(1,2)-1, peça.parentNode.id.substring(2,3)-1);
+                }
+                fora.appendChild(peça);
+                peça.setAttribute('onclick','');
+                mensagem("Peça removida com sucesso!");
+    
+                proceedPhase2();
+            } else {
+                mensagem("Tem de retirar uma peça do adversário para o seu espaço.");
+            }
         }
     }
 }
@@ -187,10 +213,12 @@ function move(event, peçaId) { //phase 2
     const blocoAlvo = event.target;
     const blocoOrigem = document.getElementById(peçaId).parentNode;
     if (game.gameState.mover_peça(blocoOrigem.id, blocoAlvo.id)) {
+
         blocoAlvo.appendChild(document.getElementById(peçaId));
         mensagem('Movimento efetuado com sucesso!');
         if (!game.againstAI) {
             game.login.notify(blocoAlvo.id.substring(1,2)-1, blocoAlvo.id.substring(2,3)-1);
+            selected = false;
         }
 
         resetBlocos();

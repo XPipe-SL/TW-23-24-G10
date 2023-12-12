@@ -18,7 +18,7 @@ class PlayerStatus {
                     console.log(JSON.parse(xhr.responseText));
                     document.getElementById('form_zone').style.display = 'none';
                     document.getElementById('logged').innerHTML = 'Logged: <br>' + nick;  
-                    disableButtons(true,true,false,false);
+                    disableButtons(true,false,false,false);
                     this.logged = true;
                 }
 
@@ -30,6 +30,7 @@ class PlayerStatus {
         }
         else
             return console.log(JSON.stringify({error: 'Nick and Password should be Strings'}));
+        this.ranking(6,5);
     }
     
     join(linhas, colunas) { //group nick password size
@@ -79,21 +80,24 @@ class PlayerStatus {
     update() { //nick game
         const url = 'http://twserver.alunos.dcc.fc.up.pt:8008/update?nick=' + encodeURIComponent(this.nick) + '&game=' + encodeURIComponent(this.game);
         const eventSource = new EventSource(url);
-        var started = true;
+        var searching = true;
         var piece = 1;
-        var lastBlockId;
-        var lastStep;
+        var fromrow;
+        var fromcolumn;
+        var pieceMoved=false;
+        var pieceRemoved=false;
+
         eventSource.onmessage = (event) => {
             const data = JSON.parse(event.data);
             console.log(data);
             
             if('board' in data) { //game starts
-                
-                if(started) { //when game is finded
 
-                    for (let names in data.players) {
-                        if (names != this.nick)
-                            this.oponnent = names;        
+                if(searching) { //when game is found
+
+                    for (let name in data.players) {
+                        if (name != this.nick)
+                            this.oponnent = name;        
                     }
 
                     if (data.turn == this.nick)
@@ -101,69 +105,98 @@ class PlayerStatus {
                     else
                         game.turnOn(3,2);
 
-                    started = false;
+                    searching = false;
 
                 } else { //every time we make a move
                     if((data.phase == 'drop') || (data.phase == 'move' && game.gameState.fase == 1)) { //phase 1
 
                         let row = data.move.row + 1;
                         let column = data.move.column + 1;
+                        let block = document.getElementById('b' + row + column);
 
-                        if (!document.getElementById('b' + row + column).hasChildNodes()) {
+                        if (!block.hasChildNodes()) {
                             game.gameState.tabuleiro[row][column] = game.gameState.turn;
-                            document.getElementById('b' + row + column).appendChild(document.getElementById(game.gameState.turn + piece));
+                            block.appendChild(document.getElementById(game.gameState.turn + piece));
+
                             piece++;
                             game.gameState.switchTurn();
                         }
-                    
+
                         // Phase change handling
                         if (data.phase == 'move') {
                             game.mudança();
                         }
 
-                    } else if(data.phase == 'move') { //phase 2
-                        if (data.step == 'from') {
-                            let block = document.getElementById('b' + (data.move.row + 1) + (data.move.column + 1));
+                    } else if (data.phase == 'move') { //phase 2
 
-                            if (!block.hasChildNodes()) {
-                                console.log('last:' + lastBlockId); 
-                                let lastBlock = document.getElementById(lastBlockId);
-                                changeBlockColor(lastBlock.id, 'yellow');
-                                block.appendChild( lastBlock.childNodes[0]);
-                                changeBlockColor(block.id, 'green');
-                                game.gameState.switchTurn();
-                            }
+                        if (pieceMoved) { //in from or take phase
+                            
+                            let torow = data.move.row+1;
+                            let tocolumn = data.move.column+1;
 
-                            lastStep = data.step;
+                            game.gameState.tabuleiro[fromrow][fromcolumn] = undefined;
+                            game.gameState.tabuleiro[torow][tocolumn] = 'j2';
+
+                            let toblocoId = 'b'+torow+tocolumn;
+                            let fromblocoId = 'b'+fromrow+fromcolumn;
+
+                            let peça = document.getElementById(fromblocoId).firstChild;
+                            changeBlockColor(toblocoId, 'green');
+                            document.getElementById(toblocoId).appendChild(peça);
+
+                            mensagem(this.oponnent + " moveu a peça do bloco amarelo para o verde.");
+
+                            pieceMoved = false;
                         }
 
-                        // Contains piece slected by the other player
-                        if (data.step == 'to') {
-                            if(lastStep == 'take') {
-                                let block = document.getElementById('b' + (data.move.row + 1) + (data.move.column + 1));
-                                if (block.hasChildNodes()) {
-                                    document.getElementById('fora2').appendChild(block.childNodes[0]);
-                                }
-                            } else if (lastStep == 'from')
-                                lastBlockId = 'b' + (data.move.row + 1) + (data.move.column + 1);       
+                        if (data.turn == this.nick) {
+                            if (data.step == 'from') {
                                 
-                            lastStep = data.step;
+                                if (pieceRemoved) { // If the other player removed our piece
+
+                                    let removeRow = data.move.row+1;
+                                    let removeColumn = data.move.column+1;
+                                    let removeblocoId = 'b'+removeRow+removeColumn;
+                                    let peça = document.getElementById(removeblocoId).firstChild;
+                                    changeBlockColor(removeblocoId, 'red');
+                                    document.getElementById( "fora2" ).appendChild( peça );
+                                    
+                                    mensagem(this.oponnent + " removeu uma peça sua.");
+
+                                    game.gameState.tabuleiro[removeRow][removeColumn] = undefined;
+                                    game.gameState.peças_j1--;
+                                    pieceRemoved = false;
+                                    game.gameState.switchTurn();
+
+                                } else if (game.gameState.tabuleiro[data.move.row+1][data.move.column+1] != 'j1') { //if revert situation
+                                    game.gameState.switchTurn();
+                                }
+                            }   
+
+                            if (data.step = 'to') { 
+                                fromrow = data.move.row+1;
+                                fromcolumn = data.move.column+1;
+                            }
                         }
 
-                        if (data.step == 'take') {
+                        if (data.turn == this.oponnent) {
 
-                            if (!block.hasChildNodes()) {
-                                console.log('last:' + lastBlockId); 
-                                let lastBlock = document.getElementById(lastBlockId);
-                                changeBlockColor(lastBlock.id, 'yellow');
-                                block.appendChild( lastBlock.childNodes[0]);
-                                changeBlockColor(block.id, 'green');
-                                game.gameState.switchTurn();
+                            // The other player is selecting
+                            if (data.step == 'to') {
+                                fromrow = data.move.row+1;
+                                fromcolumn = data.move.column+1;
+                                let blocoId = 'b'+fromrow+fromcolumn;
+                                changeBlockColor(blocoId, 'yellow');
+                                mensagem(this.oponnent + " selecionou a peça do bloco amarelo.");
+                                pieceMoved = true; 
                             }
 
-                            lastStep = data.step;
+                            // The other player has moved, and has taken our piece
+                            if (data.step == 'take') {
+                                mensagem(this.oponnent + " fez uma linha, movendo do bloco amarelo para o verde.");
+                                pieceRemoved = true;
+                            }
                         }
-                        
                     }
                 }
 
@@ -183,9 +216,10 @@ class PlayerStatus {
                     disableButtons(true,true,false,false);
                     game.restore();
                 }
+                this.ranking(6, 5);
                 eventSource.close();
             } else if ('error' in data) {
-                console.log
+                console.log;
             }
         }
     }
@@ -208,5 +242,24 @@ class PlayerStatus {
         })
     }
 
-}
+    ranking(linhas, colunas) {
+        fetch('http://twserver.alunos.dcc.fc.up.pt:8008/ranking', {
+            method: 'POST',
+            headers: {'Content-type': 'application/json'},
+            body: JSON.stringify({group: 10, size: {rows: linhas, columns: colunas}})
+        })
+        .then((response) => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                return response.status;
+            }
+        })
+        .then((data) => {
+            game.update_classifications(data);
+            console.log(data);
+        })
+    }
+    
 
+}

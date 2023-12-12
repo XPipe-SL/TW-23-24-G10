@@ -38,14 +38,32 @@
         <div id="classificações" >
             
             <div id="classificações_inner"> 
+
+                    <select size="1" name="comprimento" id="classificações_colunas">
+                        <option>5</option>
+                        <option>6</option>
+                        <option>7</option>
+                    </select>
+                    &times;
+                    <select size="1" name="altura" id="classificações_linhas">
+                        <option>6</option>
+                        <option>7</option>
+                        <option>8</option>
+                    </select>
+                    <img src="https://cdn-icons-png.flaticon.com/512/3176/3176396.png" width="25px" height="25px" onclick="game.login.ranking(parseInt(document.getElementById('classificações_linhas').value), parseInt(document.getElementById('classificações_colunas').value))">
+
                 <span class="fechar" onclick="closeClassificações()">&times;</span> <br>
                 <table id="tab_clas">
                     <tr> 
-                        <th>Posição</th>
-                        <th>Nome</th>
-                        <th>Pontos</th>
+                        <th>#</th>
+                        <th>Nickname</th>
+                        <th>Games</th>
+                        <th>Victories</th>
+                        <th>Win Rate</th>
                     </tr>
                     <tr>
+                        <td></td>
+                        <td></td>
                         <td></td>
                         <td></td>
                         <td></td>
