@@ -161,14 +161,14 @@ function select(event) { //phase 2
 
         } else { //if is possible
 
-            if(selected) {//if already selected a piece before
-                console.log(lastSelected[0] + ' ' +  lastSelected[1]);
-                game.login.notify(lastSelected[0], lastSelected[1]); //send again to revert
-
-                changeBlockColor('b' + (lastSelected[0] + 1) + (lastSelected[1] + 1), 'dimgray');
-            }
-
             if(!game.againstAI) { //send the block i really want to send
+                if(selected) {//if already selected a piece before
+                    console.log(lastSelected[0] + ' ' +  lastSelected[1]);
+                    game.login.notify(lastSelected[0], lastSelected[1]); //send again to revert
+
+                    changeBlockColor('b' + (lastSelected[0] + 1) + (lastSelected[1] + 1), 'dimgray');
+                }
+
                 game.login.notify(peça.parentNode.id.substring(1,2)-1, peça.parentNode.id.substring(2,3)-1); //send the rigth piece to move
             }
 

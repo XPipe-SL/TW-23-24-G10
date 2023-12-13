@@ -50,10 +50,10 @@
                         <option>7</option>
                         <option>8</option>
                     </select>
-                    <img src="https://cdn-icons-png.flaticon.com/512/3176/3176396.png" width="25px" height="25px" onclick="game.login.ranking(parseInt(document.getElementById('classificações_linhas').value), parseInt(document.getElementById('classificações_colunas').value))">
+                    <img class="img_click" src="https://cdn-icons-png.flaticon.com/512/3176/3176396.png" width="25px" height="25px" onclick="game.login.ranking(parseInt(document.getElementById('classificações_linhas').value), parseInt(document.getElementById('classificações_colunas').value))">
 
                 <span class="fechar" onclick="closeClassificações()">&times;</span> <br>
-                <table id="tab_clas">
+                <table id="table_clas">
                     <tr> 
                         <th>#</th>
                         <th>Nickname</th>
@@ -73,10 +73,10 @@
         </div>
 
         <div class = "main" id="main">
+
             <div id="timer">02:00</div>
+
             <div id="above_tab">
-                
-                <!-- <button id='restart' onclick="restart()" disabled="true">Reiniciar o jogo</button> -->
                 <button id='open_instruction' onclick="openInstruction()">Visualizar instruções</button>
             </div>
 
@@ -85,7 +85,7 @@
             </div>
 
             <div class="tab_main" id="tab_main" >
-                
+
                 <div class="fora j1" id="fora1"></div> <!--lugar para as peças na esquerda -->
 
                 <div class="tabuleiro" id="tab"></div> <!-- Tabuleiro central -->
@@ -99,7 +99,7 @@
 
             <div id="below_tab">
                 <button id="give_up" onclick="game.desistir()" disabled="true">Desistir do jogo</button>
-                <button id="see_scoreboard" onclick="openClassificações()" disabled="true">Visualizar classificações</button>
+                <button id="see_scoreboard" onclick="openClassificações()">Visualizar classificações</button>
             </div>   
         </div>
 
@@ -114,7 +114,10 @@
                     Password: <input type="password" id="password" placeholder="password..."> <br>
                     <button onclick="game.playerStatus(document.getElementById('nick').value, document.getElementById('password').value)"> Login </button>
                 </div>
-                <div id="logged"></div>
+                <div id="logged">
+                    <span id="logged_inner"></span>
+                    <img class="img_click" width="25px" height="25px" src="https://cdn-icons-png.flaticon.com/128/660/660350.png" onclick="game.login.logout()" cur>
+                </div>
             </div>
 
             <div class="options">

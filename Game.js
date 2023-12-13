@@ -135,7 +135,7 @@ class Game {
 
 
     update_classifications(data) {
-        var table = document.getElementById("tab_clas");
+        var table = document.getElementById("table_clas");
         var rows = table.rows;
         var ranking = data.ranking;
 

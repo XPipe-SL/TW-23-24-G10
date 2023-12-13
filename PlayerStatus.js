@@ -17,7 +17,9 @@ class PlayerStatus {
                 if(xhr.readyState == 4 && xhr.status == 200) { //success
                     console.log(JSON.parse(xhr.responseText));
                     document.getElementById('form_zone').style.display = 'none';
-                    document.getElementById('logged').innerHTML = 'Logged: <br>' + nick;  
+                    document.getElementById('logged').style.display = 'flex';
+                    document.getElementById('logged_inner').innerHTML = 'Logged: <br>' + nick;  
+                    
                     disableButtons(true,false,false,false);
                     this.logged = true;
                 }
@@ -31,6 +33,30 @@ class PlayerStatus {
         else
             return console.log(JSON.stringify({error: 'Nick and Password should be Strings'}));
         this.ranking(6,5);
+    }
+
+    logout() {
+        
+        if(game.againstAI) {
+            game.restore();
+        } else {
+            this.leave();
+            
+        }
+        
+        game.timer.stop();
+        document.getElementById("timer").innerHTML = '02:00'; 
+
+        this.nick = undefined;
+        this.password = undefined;
+        document.getElementById('form_zone').style.display = 'block';
+        document.getElementById('logged').style.display = 'none';
+        document.getElementById('nick').value = '';
+        document.getElementById('password').value = '';
+
+        disableButtons(true,false,false,true);
+        this.logged = false;
+        closeEnd();
     }
     
     join(linhas, colunas) { //group nick password size
@@ -86,6 +112,7 @@ class PlayerStatus {
         var fromcolumn;
         var pieceMoved=false;
         var pieceRemoved=false;
+        var revert = false;
 
         eventSource.onmessage = (event) => {
             const data = JSON.parse(event.data);
@@ -106,6 +133,7 @@ class PlayerStatus {
                         game.turnOn(3,2);
 
                     searching = false;
+                    mensagem('Jogo encontrado! Está a jogar contra ' + this.oponnent + '.');
 
                 } else { //every time we make a move
                     if((data.phase == 'drop') || (data.phase == 'move' && game.gameState.fase == 1)) { //phase 1
@@ -130,7 +158,7 @@ class PlayerStatus {
                     } else if (data.phase == 'move') { //phase 2
 
                         if (pieceMoved) { //in from or take phase
-                            
+
                             let torow = data.move.row+1;
                             let tocolumn = data.move.column+1;
 
@@ -147,6 +175,8 @@ class PlayerStatus {
                             mensagem(this.oponnent + " moveu a peça do bloco amarelo para o verde.");
 
                             pieceMoved = false;
+                            
+                            
                         }
 
                         if (data.turn == this.nick) {
@@ -168,9 +198,11 @@ class PlayerStatus {
                                     pieceRemoved = false;
                                     game.gameState.switchTurn();
 
-                                } else if (game.gameState.tabuleiro[data.move.row+1][data.move.column+1] != 'j1') { //if revert situation
+                                } else if (game.gameState.tabuleiro[data.move.row+1][data.move.column+1] != 'j1') { //if not revert situation
                                     game.gameState.switchTurn();
                                 }
+
+                                revert = false;
                             }   
 
                             if (data.step = 'to') { 
@@ -188,13 +220,18 @@ class PlayerStatus {
                                 let blocoId = 'b'+fromrow+fromcolumn;
                                 changeBlockColor(blocoId, 'yellow');
                                 mensagem(this.oponnent + " selecionou a peça do bloco amarelo.");
-                                pieceMoved = true; 
+                                pieceMoved = true;
+                                revert = true;
                             }
 
                             // The other player has moved, and has taken our piece
                             if (data.step == 'take') {
                                 mensagem(this.oponnent + " fez uma linha, movendo do bloco amarelo para o verde.");
                                 pieceRemoved = true;
+                            }
+
+                            if (data.step == 'from' && revert) {
+                                changeBlockColor('b' + fromrow + fromcolumn , 'dimgray');
                             }
                         }
                     }
