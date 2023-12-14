@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt">
+    <head>
+        <meta charset=UTF-8>       
+        <title>Jogo Dara</title>  
+        <link rel="stylesheet" href="style.css" type="text/css"> 
+        
+    </head>
+
+<body>
+    
+    <div class="everything">
+        
+        <div id="instruções"> <!-- bloco escondido enquanto não carrego no botaõ -->
+            <span class="fechar" onclick="closeInstruction()">&times;</span><br> <!-- o botão para fehcar as isntruções -->
+            No jogo Dara é considerada uma linha qualquer sequência de <span class="destacado">3 peças</span> na <span class="destacado">horizontal</span> ou <span class="destacado">vertical</span> apenas e não na diagonal.
+            O jogo divide-se em duas fases:
+            <h1>1ª fase:</h1>
+            <ul>
+                <li>Esta fase consiste em colocar as peças no tabuleiro;</li>
+                <li>Cada jogador coloca alternadamente uma peça numa casa livre;</li>
+                <li>Não podem existir mais de 3 peças em linha;</li>
+            </ul>
+            <h1>2ª fase:</h1>
+            <ul>
+                <li>Cada jogador move alternadamente uma peça sua;</li>
+                <li>Uma peça só pode ser movida para uma casa na <span class="destacado">horizontal</span> ou  <span class="destacado">vertical</span>;</li>
+                <li>Uma peça não pode regressar à posição da jogada anterior, apenas nas jogadas seguintes;</li>
+                <li>Quando se tem uma linha pode-se tirar uma peça do adversário do tabuleiro;</li>
+                <li>Só se pode remover uma peça do tabuleiro por jogada, mesmo tendo feito mais que uma linha;</li>
+                <li>Não se podem formar linhas com mais de 3 peças;</li>
+            </ul>
+            O jogo acaba quando ninguém puder ganhar, ou seja, ou tiver duas peças no tabuleiro ou não puder fazer nenhuma jogada válida. <br>
+            <div style="position: relative; top:20%; width:100%; text-align: center; font-size: 300%;"> Divirta-se!</div>
+            <img src="smile.png" alt="smile">
+        </div>
+
+        <div id="classificações" >
+            
+            <div id="classificações_inner"> 
+
+                    <select size="1" name="comprimento" id="classificações_colunas">
+                        <option>5</option>
+                        <option>6</option>
+                        <option>7</option>
+                    </select>
+                    &times;
+                    <select size="1" name="altura" id="classificações_linhas">
+                        <option>6</option>
+                        <option>7</option>
+                        <option>8</option>
+                    </select>
+                    <img class="img_click" src="https://cdn-icons-png.flaticon.com/512/3176/3176396.png" width="25px" height="25px" onclick="game.login.ranking(parseInt(document.getElementById('classificações_linhas').value), parseInt(document.getElementById('classificações_colunas').value))">
+
+                <span class="fechar" onclick="closeClassificações()">&times;</span> <br>
+                <table id="table_clas">
+                    <tr> 
+                        <th>#</th>
+                        <th>Nickname</th>
+                        <th>Games</th>
+                        <th>Victories</th>
+                        <th>Win Rate</th>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class = "main" id="main">
+
+            <div id="timer">02:00</div>
+
+            <div id="above_tab">
+                <button id='open_instruction' onclick="openInstruction()">Visualizar instruções</button>
+            </div>
+
+            <div id="fim">
+                <div id="fim_inner"></div>
+            </div>
+
+            <div class="tab_main" id="tab_main" >
+
+                <div class="fora j1" id="fora1"></div> <!--lugar para as peças na esquerda -->
+
+                <div class="tabuleiro" id="tab"></div> <!-- Tabuleiro central -->
+
+                <div class="fora j2" id="fora2"></div>  <!--lugar para as peças na direita -->
+            </div>
+
+            <div id="mensagens">
+                    Aqui irão aparecer as mensagens!
+            </div>
+
+            <div id="below_tab">
+                <button id="give_up" onclick="game.desistir()" disabled="true">Desistir do jogo</button>
+                <button id="see_scoreboard" onclick="openClassificações()">Visualizar classificações</button>
+            </div>   
+        </div>
+
+        <div class="sidebar">
+            <div class="logo">
+                <img src="dara_logo.png" alt="game_logo">
+            </div>
+                
+            <div class="login">
+                <div id="form_zone">
+                    Nick: <input type="text" id="nick" placeholder="nick..."> <br>
+                    Password: <input type="password" id="password" placeholder="password..."> <br>
+                    <button onclick="game.playerStatus(document.getElementById('nick').value, document.getElementById('password').value)"> Login </button>
+                </div>
+                <div id="logged">
+                    <span id="logged_inner"></span>
+                    <img class="img_click" width="25px" height="25px" src="https://cdn-icons-png.flaticon.com/128/660/660350.png" onclick="game.login.logout()" cur>
+                </div>
+            </div>
+
+            <div class="options">
+                <h1>Configurações</h1>    
+                    Tamanho do tabuleiro :
+                    <select size="1" name="comprimento" id="comprimento">
+                        <option>5</option>
+                        <option>6</option>
+                        <option>7</option>
+                    </select>
+                    &times;
+                    <select size="1" name="altura" id="altura">
+                        <option>6</option>
+                        <option>7</option>
+                        <option>8</option>
+                    </select>
+                    <br><br>
+                    Jogar contra:
+                    <div class="jogo">
+                        <input type="radio" id="jogador" name="jogo contra" checked>
+                        <label for="jogador"> Outro jogador </label>  <br>
+                        <input type="radio" id="ia" name="jogo contra">
+                        <label for="ia"> Inteligência artificial </label>
+                    </div><br>
+                    Primeiro jogador:                
+                    <select size="1" name="cor" id="cor">
+                        <option>Preto</option>
+                        <option>Branco</option>
+                    </select> <br><br>
+                    Nível de AI:   
+                    <select size="1" name="nivel" id="nivel">
+                        <option>Principiante</option>
+                        <option>Amador</option>
+                        <option>Profissional</option>
+                    </select> <br><br>
+                    <button id='submit' onclick="game.submitChanges()" disabled="true">Submeter</button>
+                    
+                
+            </div>
+        </div>
+    </div>
+
+    <script src="PlayerStatus.js"></script>
+    <script src="Timer.js"></script>
+    <script src="Tabuleiro.js"></script>
+    <script src="GameState.js"></script>
+    <script src="GameAI.js"></script>
+    <script src="Fora.js"></script>
+    <script src="Game.js"></script>
+    <script src="script.js"></script>
+
+</body>
+
+</html>
