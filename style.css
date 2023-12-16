@@ -4,6 +4,11 @@ html,body{
     font-family: Comic Sans MS, Comic Sans, cursive;
 }
 
+@font-face{
+    font-family:'digital-clock-font';
+    src: url('timer.ttf');
+}
+
 :root{
     --j1: black;
     --j2: white;
@@ -52,6 +57,7 @@ html,body{
 }
 
 /*classfications*/
+
 #classificações{
     display: none; 
     background-color: rgba(0,0,0,.5);
@@ -72,6 +78,8 @@ html,body{
 
 #classificações_inner{
     display: block;
+    width: 460px;
+    height: 560px;
     background-color: rgb(33, 34, 36);
     opacity: 90%;
     padding: 1%;
@@ -79,18 +87,24 @@ html,body{
     border-radius: 2%;
     align-items: center;
     justify-content: center;
+    text-align: center;
+}
+
+#select_size {
+    text-align: center;
+    margin-bottom: 3px;
 }
 
 #table_clas {
     border-collapse: collapse;
-    width: 100%;
+    border-spacing: 0;
+    padding: 3%;
 }
   
 #table_clas td, #table_clas th {
     border: 1px solid gray;
     padding: 8px;
 }
-  
   
 #table_clas th {
     padding-top: 12px;
@@ -100,19 +114,15 @@ html,body{
     color: white;
 }
 
-.table {
-    border-spacing: 0;
-    width: 100%;
-    padding: 5%;
-}
-  
 .th, .td {
     text-align: center;
     padding: 5%;
 }
 
-.th:first-child {
-    visibility: hidden;
+#no_results {
+    display: none;
+    position: relative;
+    top: 30%;
 }
 
 /* end of game divs*/
@@ -201,12 +211,19 @@ html,body{
 }
 
 #timer {
+    font-family:'digital-clock-font';
+
+    width: 90px;
+    height: 45px;
+
     background-color: greenyellow;
     color: black;
-    font-size:xx-large;
-    margin: 1%;
-    padding: 1%;
+
     text-align: center;
+    font-size:45px;
+    margin: 5px;
+    padding: 3px;
+    border-radius: 10%;
     line-height: 100%;
 }
 
@@ -266,10 +283,9 @@ html,body{
 
 .fechar{
     float: right;
-    position: relative;
-    top: -3%;
     cursor: pointer;
     font-size: 35px;
+    line-height: 1em;
 }
 
 .destacado{

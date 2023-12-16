@@ -32,13 +32,16 @@
             </ul>
             O jogo acaba quando ninguém puder ganhar, ou seja, ou tiver duas peças no tabuleiro ou não puder fazer nenhuma jogada válida. <br>
             <div style="position: relative; top:20%; width:100%; text-align: center; font-size: 300%;"> Divirta-se!</div>
-            <img src="smile.png" alt="smile">
+            <img src="https://png.pngtree.com/png-vector/20220520/ourmid/pngtree-happy-emoji-emoticon-showing-double-thumbs-up-like-png-image_4708251.png" alt="smile">
         </div>
 
         <div id="classificações" >
             
             <div id="classificações_inner"> 
+                <span class="fechar" onclick="closeClassificações()">&times;</span> <br>
+                <div id="select_size">
 
+                    <label for="classificações_colunas">Tamanho:</label>
                     <select size="1" name="comprimento" id="classificações_colunas">
                         <option>5</option>
                         <option>6</option>
@@ -50,9 +53,17 @@
                         <option>7</option>
                         <option>8</option>
                     </select>
-                    <img class="img_click" src="https://cdn-icons-png.flaticon.com/512/3176/3176396.png" width="25px" height="25px" onclick="game.login.ranking(parseInt(document.getElementById('classificações_linhas').value), parseInt(document.getElementById('classificações_colunas').value))">
+                    
+                    <label for="classificações_contra">Contra:</label>
+                    <select size="1" name="contra" id="classificações_contra">
+                        <option>Jogador</option>
+                        <option>Máquina</option>
+                    </select>
 
-                <span class="fechar" onclick="closeClassificações()">&times;</span> <br>
+                    <img class="img_click" src="https://cdn-icons-png.flaticon.com/512/3176/3176396.png" width="25px" height="25px" style="padding: 2px;"  onclick="game.update_classifications(parseInt(document.getElementById('classificações_linhas').value), parseInt(document.getElementById('classificações_colunas').value)), document.getElementById('classificações_contra')">
+
+                </div>
+                
                 <table id="table_clas">
                     <tr> 
                         <th>#</th>
@@ -69,6 +80,7 @@
                         <td></td>
                     </tr>
                 </table>
+                <div id="no_results">Ainda sem registos.</div>
             </div>
         </div>
 
@@ -99,7 +111,7 @@
 
             <div id="below_tab">
                 <button id="give_up" onclick="game.desistir()" disabled="true">Desistir do jogo</button>
-                <button id="see_scoreboard" onclick="openClassificações()">Visualizar classificações</button>
+                <button id="see_scoreboard" onclick="openClassificações()" disabled="true">Visualizar classificações</button>
             </div>   
         </div>
 

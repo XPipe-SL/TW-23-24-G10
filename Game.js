@@ -4,6 +4,7 @@ class Game {
         this.j2;
         this.timer = new Timer();
         this.restore(this.j1,this.j2);
+        this.ranks;
     }
 
     restore (j1, j2) {
@@ -45,6 +46,7 @@ class Game {
         this.restore(document.getElementById('cor').value);
         closeEnd();
         disableButtons(false,false,false,true);
+        disableRadio(true);
         if(this.againstAI) { //we turn on the game
             this.turnOn(3);  
             this.gameState.turn = 'j1';
@@ -92,6 +94,7 @@ class Game {
     }
 
     game_finished(finished, time){
+        disableRadio(false);
         if (finished === undefined)
             var finished = this.gameState.game_finished();
         
@@ -103,6 +106,34 @@ class Game {
                 } else {
                     mensagem("A máquina ganhou! Para jogar de novo reinicie o jogo.");
                     fim_mensagem("A máquina ganhou!");
+                    if(typeof(Storage) !== undefined) {
+                        let player = localStorage.getItem(this.linhas + 'x' + this.colunas);
+                        let data = []
+                        if (player !== null) {
+                            let player_data = JSON.parse(player);
+                            let done = false;
+                            for (let i =0; i<player_data.length; i++) {
+                                if (player_data[i].nick == this.login.nick) {
+                                    data.push({nick: player_data[i].nick, games: (player_data[i].games + 1), victories: player_data[i].victories})
+                                    done = true;
+                                } else if(player_data[i].nick == 'Máquina') {
+                                    data.push({nick: player_data[i].nick, games: (player_data[i].games + 1), victories: (player_data[i].victories + 1)})
+                                } else {
+                                    data.push({nick: player_data[i].nick, games: player_data[i].games, victories: player_data[i].victories})
+                                }
+                            }
+                            if(!done) {
+                                data.push({nick: this.login.nick, games: 1, victories: 0});
+                            }
+                            localStorage.setItem(this.linhas + 'x' + this.colunas, JSON.stringify(data));
+                        } else {
+                            data.push({nick: this.login.nick, games: 1, victories: 0});
+                            data.push({nick: 'Máquina', games: 1, victories: 1});
+                            localStorage.setItem(this.linhas + 'x' + this.colunas, JSON.stringify(data));
+                        }
+                    } else {
+                        console.log('Web Storage not supported');
+                    }
                 }
                 this.timer.stop();
                 openEnd();
@@ -112,6 +143,40 @@ class Game {
     
         if (finished == 2){
             setTimeout(() => {
+                if(this.againstAI) {
+                    if(typeof(Storage) !== undefined) {
+                        let player = localStorage.getItem(this.linhas + 'x' + this.colunas);
+                        let data = []
+                        if (player !== null) {
+                            let player_data = JSON.parse(player);
+                            let done = false;
+                            console.log(player_data.length)
+                            for (let i =0; i<player_data.length; i++) {
+                                console.log(i)
+                                if (player_data[i].nick == this.login.nick && !done) {
+                                    data.push({nick: player_data[i].nick, games: (player_data[i].games + 1), victories: (player_data[i].victories + 1)})
+                                    done = true;
+                                } else if(player_data[i].nick == 'Máquina') {
+                                    data.push({nick: player_data[i].nick, games: (player_data[i].games + 1), victories: player_data[i].victories})
+                                } else {
+                                    data.push({nick: player_data[i].nick, games: player_data[i].games, victories: player_data[i].victories})
+                                }
+                            }
+                            console.log('out of cycle')
+                            if(!done) {
+                                data.push({nick: this.login.nick, games: 1, victories: 1});
+                            }
+                            localStorage.setItem(this.linhas + 'x' + this.colunas, JSON.stringify(data));
+                        } else {
+                            data.push({nick: this.login.nick, games: 1, victories: 1});
+                            data.push({nick: 'Máquina', games: 1, victories: 0});
+                            localStorage.setItem(this.linhas + 'x' + this.colunas, JSON.stringify(data));
+                        }
+                    } else {
+                        console.log('Web Storage not supported');
+                    }
+                }
+
                 mensagem("Parabéns, ganhaste! Para jogar de novo reinicie o jogo.")
                 fim_mensagem("Parabéns, ganhaste!")
                 this.timer.stop();
@@ -124,7 +189,37 @@ class Game {
 
     desistir() {
         this.timer.stop();
+        disableRadio(false);
         if(this.againstAI) {
+            if(typeof(Storage) !== undefined) {
+                let player = localStorage.getItem(this.linhas + 'x' + this.colunas);
+                let data = []
+                if (player !== null) {
+                    let player_data = JSON.parse(player);
+                    let done = false;
+                    for (let i =0; i<player_data.length; i++) {
+                        if (player_data[i].nick == this.login.nick) {
+                            data.push({nick: player_data[i].nick, games: (player_data[i].games + 1), victories: player_data[i].victories})
+                            done = true;
+                        } else if(player_data[i].nick == 'Máquina') {
+                            data.push({nick: player_data[i].nick, games: (player_data[i].games + 1), victories: (player_data[i].victories + 1)})
+                        } else {
+                            data.push({nick: player_data[i].nick, games: player_data[i].games, victories: player_data[i].victories})
+                        }
+                    }
+                    if(!done) {
+                        data.push({nick: this.login.nick, games: 1, victories: 0});
+                    }
+                    localStorage.setItem(this.linhas + 'x' + this.colunas, JSON.stringify(data));
+                } else {
+                    data.push({nick: this.login.nick, games: 1, victories: 0});
+                    data.push({nick: 'Máquina', games: 1, victories: 1});
+                    localStorage.setItem(this.linhas + 'x' + this.colunas, JSON.stringify(data));
+                }
+            } else {
+                console.log('Web Storage not supported');
+            }
+
             mensagem("Você desistiu! Para jogar de novo submeta de novo");
             fim_mensagem("Você desistiu! \n" + "A máquina ganhou!");
             openEnd();
@@ -134,46 +229,78 @@ class Game {
     }   
 
 
-    update_classifications(data) {
-        var table = document.getElementById("table_clas");
+    update_classifications(linhas, colunas) {
+        
+        const table = document.getElementById("table_clas");
         var rows = table.rows;
-        var ranking = data.ranking;
+        let contra = document.getElementById('classificações_contra').value;
+        var ranking
 
-        for(let i=rows.length - 1; i>0; i--) {
-            table.deleteRow(i);
-        }
+        if (contra == "Jogador") {
+            this.login.ranking(linhas, colunas);
+            ranking = this.ranks
+        } else {
+            if (typeof(Storage) !== undefined) {
+                let player = localStorage.getItem(linhas + 'x' + colunas);
+                if (player !== null) {
 
-        for(let i=0; i<ranking.length; i++) {
-            var new_row = table.insertRow(1);
-            var cell1 = new_row.insertCell(0);
-            var cell2 = new_row.insertCell(1);
-            var cell3 = new_row.insertCell(2);
-            var cell4 = new_row.insertCell(3);
-            var cell5 = new_row.insertCell(4);
-
-            cell1.innerHTML = "0";
-            cell2.innerHTML = ranking[i].nick;
-            cell3.innerHTML = ranking[i].games;
-            cell4.innerHTML = ranking[i].victories;
-            var ratio = ranking[i].victories / ranking[i].games * 100
-            cell5.innerHTML = Math.floor(ratio);//ratio win/games
-        }
-
-        var n = rows.length;
-        for (let i = 1; i < n; i++) {
-            for (let j = 1; j < n - i ; j++) {
-                var x = parseFloat(rows[j].cells[4].innerHTML);
-                var y = parseFloat(rows[j + 1].cells[4].innerHTML);
-                var xx = parseFloat(rows[j].cells[2].innerHTML);
-                var yy = parseFloat(rows[j + 1].cells[2].innerHTML);
-
-                if (y > x || (y == x && yy > xx)) {
-                    rows[j].cells[0].innerHTML = j + 1;
-                    rows[j + 1].cells[0].innerHTML = j;
-                    rows[j].parentNode.insertBefore(rows[j + 1], rows[j]);
+                    ranking = JSON.parse(player);
                 } else {
-                    rows[j].cells[0].innerHTML = j;
-                    rows[j + 1].cells[0].innerHTML = j + 1;
+                    table.style.display = 'none';
+                    document.getElementById('no_results').style.display = 'block';
+                    return;
+                }
+            } else {
+                console.log("Web Storage not supported");
+                table.style.display = 'none';
+                document.getElementById('no_results').style.display = 'block';
+                return;
+            }
+        }
+
+        if (ranking.length == 0) {
+            table.style.display = 'none';
+            document.getElementById('no_results').style.display = 'block';
+        } else {
+            document.getElementById('no_results').style.display = 'none';
+            table.style.display = 'block';
+            
+            for(let i=rows.length - 1; i>0; i--) {
+                table.deleteRow(i);
+            }
+
+            for(let i=0; i<ranking.length; i++) {
+                let new_row = table.insertRow(1);
+                let cell1 = new_row.insertCell(0);
+                let cell2 = new_row.insertCell(1);
+                let cell3 = new_row.insertCell(2);
+                let cell4 = new_row.insertCell(3);
+                let cell5 = new_row.insertCell(4);
+
+                cell1.innerHTML = "0";
+                cell2.innerHTML = ranking[i].nick;
+                cell3.innerHTML = ranking[i].games;
+                cell4.innerHTML = ranking[i].victories;
+                let ratio = ranking[i].victories / ranking[i].games * 100
+                cell5.innerHTML = Math.floor(ratio);//ratio win/games
+            }
+
+            var n = rows.length;
+            for (let i = 1; i < n; i++) {
+                for (let j = 1; j < n - i ; j++) {
+                    var x = parseFloat(rows[j].cells[4].innerHTML);
+                    var y = parseFloat(rows[j + 1].cells[4].innerHTML);
+                    var xx = parseFloat(rows[j].cells[2].innerHTML);
+                    var yy = parseFloat(rows[j + 1].cells[2].innerHTML);
+
+                    if (y > x || (y == x && yy > xx)) {
+                        rows[j].cells[0].innerHTML = j + 1;
+                        rows[j + 1].cells[0].innerHTML = j;
+                        rows[j].parentNode.insertBefore(rows[j + 1], rows[j]);
+                    } else {
+                        rows[j].cells[0].innerHTML = j;
+                        rows[j + 1].cells[0].innerHTML = j + 1;
+                    }
                 }
             }
         }

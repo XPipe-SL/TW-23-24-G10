@@ -10,6 +10,12 @@ function disableButtons(giveUp, seeScoreBoard, instruction, submit) { //true -> 
     document.getElementById('submit').disabled = submit;
 }
 
+function disableRadio(option) {
+    const radios = document.getElementsByName('jogo contra');
+    for(let i=0; i<radios.length; i++)
+        radios[i].disabled = option;
+}
+
 function changeBlockColor(blocoId, color, time) {
     const bloco = document.getElementById(blocoId);
 
@@ -29,7 +35,7 @@ function blockPieceMovement(player) {
         } 
         if(player == 2 || player == 3) {
             const peça2 = document.getElementById("j2" + (i + 1));
-            peça2.setAttribute("onclick", ""); 
+            peça2.setAttribute("onclick", "");
         }
     }
 }

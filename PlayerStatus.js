@@ -5,6 +5,7 @@ class PlayerStatus {
         this.logged = false;
         this.game;
         this.register(nick, password);
+        this.in_game = false;;
     }
 
     register(nick, password) { //nick password
@@ -36,13 +37,12 @@ class PlayerStatus {
     }
 
     logout() {
-        
-        if(game.againstAI) {
-            game.restore();
-        } else {
+        if(this.in_game) {
             this.leave();
-            
         }
+
+        game.restore();
+
         
         game.timer.stop();
         document.getElementById("timer").innerHTML = '02:00'; 
@@ -61,7 +61,7 @@ class PlayerStatus {
     
     join(linhas, colunas) { //group nick password size
         this.size = JSON.parse('{"rows":' + linhas + ', "columns": ' + colunas + '}');
-    
+        
         fetch('http://twserver.alunos.dcc.fc.up.pt:8008/join', {
             method: 'POST',
             headers: {'Content-type': 'application/json'}, 
@@ -76,6 +76,7 @@ class PlayerStatus {
         })
         .then((data) => {
             console.log(data);
+            this.in_game = true;
             this.game = JSON.parse(data).game;
             disableButtons(false, false, false, true);
             this.update();
@@ -117,8 +118,24 @@ class PlayerStatus {
         eventSource.onmessage = (event) => {
             const data = JSON.parse(event.data);
             console.log(data);
-            
-            if('board' in data) { //game starts
+            if ('winner' in data) { //end of game
+                if (data.winner == this.nick) {
+                    fim_mensagem('Você ganhou!');
+                    game.timer.stop();
+                    openEnd();                   
+                } else if (data.winner == this.oponnent && this.oponnent != null) {
+                    fim_mensagem(this.oponnent + ' ganhou!');
+                    game.timer.stop();
+                    openEnd();
+                } else { //not joinned
+                    disableButtons(true,true,false,false);
+                    game.restore();
+                }
+                disableRadio(false);
+                this.ranking(6, 5);
+                this.in_game = false;
+                eventSource.close();
+            } else if('board' in data) { //game starts
 
                 if(searching) { //when game is found
 
@@ -239,22 +256,6 @@ class PlayerStatus {
 
                 this.board = data.board;
                 
-            } else if ('winner' in data) { //end of game
-
-                if (data.winner == this.nick) {
-                    fim_mensagem('Você ganhou!');
-                    game.timer.stop();
-                    openEnd();                   
-                } else if (data.winner == this.oponnent && this.oponnent != null) {
-                    fim_mensagem(this.oponnent + ' ganhou!');
-                    game.timer.stop();
-                    openEnd();
-                } else { //not joinned
-                    disableButtons(true,true,false,false);
-                    game.restore();
-                }
-                this.ranking(6, 5);
-                eventSource.close();
             } else if ('error' in data) {
                 console.log;
             }
@@ -293,8 +294,8 @@ class PlayerStatus {
             }
         })
         .then((data) => {
-            game.update_classifications(data);
             console.log(data);
+            game.ranks = data.ranking;
         })
     }
     
