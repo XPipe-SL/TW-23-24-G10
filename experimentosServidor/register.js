@@ -13,11 +13,13 @@ module.exports.f = function (request, response){
         let pw;
         let resp_stat;
         let pw_h;
+        //store the data send by request
         request.on('data', function(chunk) {
               //console.log("Received body data:");
               data_req += chunk;
               //console.log(data_req);
             });
+        //process the data after everything is received
         request.on('end', function(){
             //console.log('request complete')
             data_j = JSON.parse(data_req);
@@ -55,11 +57,13 @@ module.exports.f = function (request, response){
                 .then(() => {  //something weird is happening here
                     if (resp_stat == undefined) {resp_stat = 500;}
                     response.writeHead(resp_stat, {'Access-Control-Allow-Origin': '*', 'Cache-Control': 'no-cache'});
-                    response.end();
+                    //response.end();
                 })
+                .then(()=>{response.end()})
                 .catch( (err) => {console.log('Error while loading data')  } )
 
-        });        
+        });
+        request.on('error', (err) => {console.log(err.message);})        
 
 }};
 
