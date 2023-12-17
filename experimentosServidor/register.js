@@ -36,7 +36,7 @@ module.exports.f = function (request, response){
                     //check if nick exists as key                    
                     //if no, make new entry with nick as key and pw as value
                     if (data_file[nick] == undefined) {
-                        console.log('no entry jet');
+                        console.log('no entry yet');
                         data_file[nick] = pw_h;
                         //console.log(data_file);
                         fsp.writeFile('./files/login.txt', JSON.stringify(data_file));

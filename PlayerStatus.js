@@ -1,3 +1,6 @@
+// Stores server url
+const server = "http://localhost:8007"
+
 class PlayerStatus {
     constructor(nick, password) {
         this.nick = nick;
@@ -11,11 +14,11 @@ class PlayerStatus {
         if (typeof nick === 'string' && typeof password === 'string' && nick.trim() != "" && password.trim() != "") { //checks if nick and password are non empty strings
 
             const xhr = new XMLHttpRequest();
-            xhr.open('POST', 'http://localhost:8007/register', true)
+            xhr.open('POST', server+'/register', true)
             xhr.onreadystatechange = function() {
 
                 if(xhr.readyState == 4 && xhr.status == 200) { //success
-                    console.log(JSON.parse(xhr.responseText));
+                    //console.log(JSON.parse(xhr.responseText));
                     document.getElementById('form_zone').style.display = 'none';
                     document.getElementById('logged').style.display = 'flex';
                     document.getElementById('logged_inner').innerHTML = 'Logged: <br>' + nick;  
@@ -62,7 +65,7 @@ class PlayerStatus {
     join(linhas, colunas) { //group nick password size
         this.size = JSON.parse('{"rows":' + linhas + ', "columns": ' + colunas + '}');
     
-        fetch('http://twserver.alunos.dcc.fc.up.pt:8008/join', {
+        fetch(server+'/join', {
             method: 'POST',
             headers: {'Content-type': 'application/json'}, 
             body: JSON.stringify({ group: 10, nick: this.nick, password: this.password, size: this.size })
@@ -262,7 +265,7 @@ class PlayerStatus {
     }
 
     leave() {
-        fetch('http://twserver.alunos.dcc.fc.up.pt:8008/leave', {
+        fetch(server+'/leave', {
             method: 'POST',
             headers: {'Content-type': 'application/json'},
             body: JSON.stringify({nick: this.nick, password: this.password, game: this.game})

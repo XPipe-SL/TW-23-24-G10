@@ -11,6 +11,7 @@ const leave = require('./leave.js')
 const ranking = require('./ranking.js')
 
 http.createServer((request,response) => {
+    // console.log(request.method);
     switch(request.url) { 
     case '/register':
         register.f(request,response);
@@ -18,19 +19,20 @@ http.createServer((request,response) => {
         break;
     case '/join':
         join.f(request, response);
-        response.end('Joining not possible jet');
+        //response.writeHead(200, {'Access-Control-Allow-Origin': '*', 'Cache-Control': 'no-cache'});
+        //response.end('Joining not possible yet');
         break;
     case '/notify':
         notify.f(request, response);
-        response.end('notify not possible jet');
+        response.end('notify not possible yet');
         break;
     case '/update':
         update.f(request, response);
-        response.end('update not possible jet');
+        response.end('update not possible yet');
         break;
     case '/leave':
         leave.f(request,response);
-        response.end('leaving not possible jet');
+        response.end('leaving not possible yet');
         break;
     case '/ranking':
         ranking.f(request, response);
