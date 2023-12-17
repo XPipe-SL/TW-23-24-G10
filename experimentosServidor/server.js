@@ -14,7 +14,7 @@ http.createServer((request,response) => {
     switch(request.url) { 
     case '/register':
         register.f(request,response);
-        response.end('Register not possible jet')
+        //response.end();
         break;
     case '/join':
         join.f(request, response);
@@ -34,7 +34,7 @@ http.createServer((request,response) => {
         break;
     case '/ranking':
         ranking.f(request, response);
-        response.end('ranking not possible jet')
+        //response.end('ranking not possible jet')
         break;
     default:
         response.writeHead(501); 

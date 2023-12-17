@@ -1,5 +1,3 @@
-//problems: the answering kind of doesn't work 
-//I haven't understood jet how syncronous/asyncronous functions are working in this case, I guess or at least not what request.on() is doing
 //missing: parts of error handling
 const crypto = require('crypto');
 const fsp = require('fs').promises;
@@ -57,7 +55,6 @@ module.exports.f = function (request, response){
                 .then(() => {  //something weird is happening here
                     if (resp_stat == undefined) {resp_stat = 500;}
                     response.writeHead(resp_stat, {'Access-Control-Allow-Origin': '*', 'Cache-Control': 'no-cache'});
-                    //response.end();
                 })
                 .then(()=>{response.end()})
                 .catch( (err) => {console.log('Error while loading data')  } )
