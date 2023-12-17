@@ -98,12 +98,11 @@ class Game {
         if (finished == 1){
             setTimeout(() =>{
                 if (!this.againstAI) {
-                    mensagem("O jogador 2 ganhou! Para jogar de novo reinicie o jogo.");
-                    fim_mensagem("Parabéns jogador 2, ganhaste!");
+                    mensagem(this.login.oponnent + " ganhou!");
+                    fim_mensagem(this.login.oponnent + " ganhou!");
                 } else {
                     mensagem("A máquina ganhou! Para jogar de novo reinicie o jogo.");
                     fim_mensagem("A máquina ganhou!");
-                    this.update_classifications(this.j2);
                 }
                 this.timer.stop();
                 openEnd();
@@ -113,9 +112,8 @@ class Game {
     
         if (finished == 2){
             setTimeout(() => {
-                mensagem("O jogador 1 ganhou! Para jogar de novo reinicie o jogo.")
-                fim_mensagem("Parabéns jogador 1, ganhaste!")
-                this.update_classifications(this.j1);
+                mensagem("Parabéns, ganhaste! Para jogar de novo reinicie o jogo.")
+                fim_mensagem("Parabéns, ganhaste!")
                 this.timer.stop();
                 openEnd();
                 return true;
@@ -135,67 +133,50 @@ class Game {
         }  
     }   
 
-    update_classifications(name){
-        var points = Math.abs(this.gameState.peças_j1-this.gameState.peças_j2);
-        var table = document.getElementById("tab_clas");
+
+    update_classifications(data) {
+        var table = document.getElementById("table_clas");
         var rows = table.rows;
-        var changed = false;
-        /*go throug list and see if name is already in it*/
-        for (var i = 1; i < (rows.length); i++) {
-            var name_cell= rows[i].getElementsByTagName("TD")[1].innerHTML;
-            if (name==name_cell) {
-                changed = true;
-                /*check if points are higher than before*/
-                var old_points = rows[i].getElementsByTagName("TD")[2].innerHTML;
-                if (points>old_points) {
-                    /*change points*/
-                    rows[i].getElementsByTagName("TD")[2].innerHTML = points;
-                }
-            }
+        var ranking = data.ranking;
+
+        for(let i=rows.length - 1; i>0; i--) {
+            table.deleteRow(i);
         }
-        if (!changed) { /*means, name wasnt in table jet*/
-            /*add row to table (is inserted as the first row)*/
+
+        for(let i=0; i<ranking.length; i++) {
             var new_row = table.insertRow(1);
             var cell1 = new_row.insertCell(0);
             var cell2 = new_row.insertCell(1);
             var cell3 = new_row.insertCell(2);
+            var cell4 = new_row.insertCell(3);
+            var cell5 = new_row.insertCell(4);
 
             cell1.innerHTML = "0";
-            cell2.innerHTML = name;
-            cell3.innerHTML = points;
+            cell2.innerHTML = ranking[i].nick;
+            cell3.innerHTML = ranking[i].games;
+            cell4.innerHTML = ranking[i].victories;
+            var ratio = ranking[i].victories / ranking[i].games * 100
+            cell5.innerHTML = Math.floor(ratio);//ratio win/games
         }
 
-        /*sort the table in decrecing order of points*/
-        var switching = true;
-        var shouldSwitch;
-        while (switching) {
-            switching = false;
-            rows = table.rows;
-            for (var i = 1; i < (rows.length - 1); i++) {
-              shouldSwitch = false;
-              /* Get the two elements you want to compare,
-              one from current row and one from the next: */
-              var x = rows[i].getElementsByTagName("TD")[2];
-              var y = rows[i + 1].getElementsByTagName("TD")[2];
-              // Check if the two rows should switch place:
-              if (x.innerHTML < y.innerHTML) {
-                // If so, mark as a switch and break the loop:
-                shouldSwitch = true;
-                break;
-              }
-            }
-            if (shouldSwitch) {
-              /* If a switch has been marked, make the switch
-              and mark that a switch has been done: */
-              rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-              switching = true;
-            }
-          }
+        var n = rows.length;
+        for (let i = 1; i < n; i++) {
+            for (let j = 1; j < n - i ; j++) {
+                var x = parseFloat(rows[j].cells[4].innerHTML);
+                var y = parseFloat(rows[j + 1].cells[4].innerHTML);
+                var xx = parseFloat(rows[j].cells[2].innerHTML);
+                var yy = parseFloat(rows[j + 1].cells[2].innerHTML);
 
-          /*make numeration right*/
-          for (var i = 1; i < (rows.length - 1); i++) {
-            rows[i].getElementsByTagName("TD")[0].innerHTML = i;
-          }
+                if (y > x || (y == x && yy > xx)) {
+                    rows[j].cells[0].innerHTML = j + 1;
+                    rows[j + 1].cells[0].innerHTML = j;
+                    rows[j].parentNode.insertBefore(rows[j + 1], rows[j]);
+                } else {
+                    rows[j].cells[0].innerHTML = j;
+                    rows[j + 1].cells[0].innerHTML = j + 1;
+                }
+            }
+        }
     }
 
     AInextStep(){

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt">
+    <head>
+        <meta charset=UTF-8>       
+        <title>Jogo Dara</title>  
+        <link rel="stylesheet" href="style_lara.css" type="text/css"> 
+        
+    </head>
+
+<body>
+    
+    <div class="everything">
+        <div id="ganhou">
+                <div id="ganhou_inner"></div> <br>
+                <button id="closeGanhar" onclick="closeWinning()"> OK </button>
+            </div>
+        <div id="instruções"> <!-- bloco escondido enquanto não carrego no botaõ -->
+            <span class="fechar" onclick="closeInstruction()">X</span> <!-- o botão para fehcar as isntruções -->
+            No jogo Dara é considerada uma linha qualquer sequência de <span class="destacado">3 peças</span> na <span class="destacado">horizontal</span> ou <span class="destacado">vertical</span> apenas e não na diagonal.
+            O jogo divide-se em duas fases:
+            <h1>1ª fase:</h1>
+            <ul>
+                <li>Esta fase consiste em colocar as peças no tabuleiro;</li>
+                <li>Cada jogador coloca alternadamente uma peça numa casa livre;</li>
+                <li>Não podem existir mais de 3 peças em linha;</li>
+            </ul>
+            <h1>2ª fase:</h1>
+            <ul>
+                <li>Cada jogador move alternadamente uma peça sua;</li>
+                <li>Uma peça só pode ser movida para uma casa na <span class="destacado">horizontal</span> ou  <span class="destacado">vertical</span>;</li>
+                <li>Uma peça não pode regressar à posição da jogada anterior, apenas nas jogadas seguintes;</li>
+                <li>Quando se tem uma linha pode-se tirar uma peça do adversário do tabuleiro;</li>
+                <li>Só se pode remover uma peça do tabuleiro por jogada, mesmo tendo feito mais que uma linha;</li>
+                <li>Não se podem formar linhas com mais de 3 peças;</li>
+            </ul>
+            O jogo acaba quando ninguém puder ganhar, ou seja, ou tiver duas peças no tabuleiro ou não puder fazer nenhuma jogada válida. <br/>
+            <div style="position: relative; top:20%; width:100%; text-align: center; font-size: 300%;"> Divirta-se!</div>
+            <img src="smile.png">
+        </div>
+
+        <div id="classificações" >
+            
+            <div id="classificações_inner"> 
+                <span class="fechar" onclick="closeClassificações()">X</span> <br>
+                <table id="tab_clas">
+                    <tr> 
+                        <th>Posição</th>
+                        <th>Nome</th>
+                        <th>Pontos</th>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                   
+                </table>
+            </div>
+        </div>
+
+        
+
+        <div class = "main">
+
+            <div class="above_tab">
+                <button onclick="game.restore(document.getElementById('cor').value)">Reiniciar Jogo</button>
+                <button onclick="openInstruction()">Visualizar Instruções</button>
+            </div>
+            <div class="tab_main" id="tab_main" >
+                
+                <div class="fora j1" id="fora1" ondrop="drop(event)" ondragover="allowDrop(event)"></div> <!-- lugar para as peças na esquerda -->
+
+                <div class="tabuleiro" id="tab"></div> <!-- Tabuleiro central -->
+
+                <div class="fora j2" id="fora2" ondrop="drop(event)" ondragover="allowDrop(event)"></div> <!-- lugar para as peças na direita -->
+            </div>
+            <div id="mensagens">
+                    Aqui irão aparecer as mensagens!
+            </div>
+            <div class="below_tab">
+                <button>Desistir Jogo</button>
+                <button onclick="openClassificações()">Vizualizar Classificações</button>
+            </div>   
+        </div>
+
+        <div class="sidebar">
+            
+            <div class="logo">
+                <img src="dara_logo.png" alt="game_logo">
+            </div>
+                
+            <div class="login">
+                <form action="login" method="post">
+                    Username: <input type="text" id="username"> <br>
+                    Password: <input type="password" id="password">
+                </form>
+            </div>
+
+            <div class="options">
+                
+                <h1>Configurações </h1>
+                    <form action="registar" method="post">
+                        Tamanho do tabuleiro :
+                        <select size="1" name="comprimento" id="comprimento">
+                            <option>5</option>
+                            <option>6</option>
+                            <option>7</option>
+                        </select>
+                        x
+                        <select size="1" name="altura" id="altura">
+                            <option>6</option>
+                            <option>7</option>
+                            <option>8</option>
+                        </select>
+                        <br>
+                        Jogar contra:
+                        <div class="jogo">
+                            <input type="radio" id="jogador" name="jogo contra">
+                            <label for="jogador"> Outro jogador </label>  <br>
+                            <input type="radio" id="ia" name="jogo contra">
+                            <label for="ia"> Inteligência artificial </label>
+                        </div>
+                        Primeiro jogador:
+                        <select size="1" name="cor" id="cor">
+                            <option>Preto</option>
+                            <option>Branco</option>
+                        </select> <br/>
+                        Nível de AI
+                        <select size="1" name="nivel">
+                            <option>Principiante</option>
+                            <option>Amador</option>
+                            <option>Profissional</option>
+                        </select> <br/>
+                        <input type="button" name="submit" value="Submeter" onclick="game.restore(document.getElementById('cor').value)" />
+                    </form>
+                
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="script_lara.js"></script>
+</body>
+
+</html>

@@ -18,6 +18,7 @@ html,body{
     align-items: stretch;
 }
 
+/* main part */
 .main{  
     flex-basis: 80%; 
     background-color: lightgrey;
@@ -27,6 +28,197 @@ html,body{
     flex-direction: column;
     justify-content: center;/*space-around;*/
     align-items: center;
+}
+
+/*instructions*/
+#instruções{
+    flex-basis: 74%; 
+    background-color: lightgrey;
+    border-radius: 7px;
+    display: none; 
+    padding: 3%;
+    margin: 1px;
+
+    color: black; 
+    font-size: larger;
+    line-height: 120%;
+}
+
+#instruções img{
+    width: 200px;
+    height: 200px;
+    
+    object-fit: scale-down;
+}
+
+/*classfications*/
+#classificações{
+    display: none; 
+    background-color: rgba(0,0,0,.5);
+    color: white; 
+    font-size: large;
+    position: absolute; 
+    padding: 1%;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    transition: all 0.5s ease-in-out;
+   
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+#classificações_inner{
+    display: block;
+    background-color: rgb(33, 34, 36);
+    opacity: 90%;
+    padding: 1%;
+    margin: 5pt;
+    border-radius: 2%;
+    align-items: center;
+    justify-content: center;
+}
+
+#table_clas {
+    border-collapse: collapse;
+    width: 100%;
+}
+  
+#table_clas td, #table_clas th {
+    border: 1px solid gray;
+    padding: 8px;
+}
+  
+  
+#table_clas th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: darkcyan;
+    color: white;
+}
+
+.table {
+    border-spacing: 0;
+    width: 100%;
+    padding: 5%;
+}
+  
+.th, .td {
+    text-align: center;
+    padding: 5%;
+}
+
+.th:first-child {
+    visibility: hidden;
+}
+
+/* end of game divs*/
+#fim {
+    display: none;
+    background-color: darkcyan;
+    color: black;
+    font-size: xx-large;
+    transition: all 0.5s ease-in-out;
+    align-items: center;
+    border-radius: 40px;
+    padding: 3px;
+    margin: 10px;
+
+    text-align: center;
+}
+
+#fim_inner {
+    margin: auto;
+}
+
+/*tab*/
+.tab_main{
+    display: flex;
+}
+
+.fora{
+    width: calc(var(--peça_size)*3.2);
+    border: solid;
+    border-color: var(--j1);
+    padding: 3px;
+    margin: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    gap: 2px;
+}
+
+.peça{
+    aspect-ratio: 1/1;
+    width: var(--peça_size);
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.fora.j1{
+    border-color: var(--j1);
+    flex-flow: row-reverse wrap-reverse;
+}
+
+.peça.j1{
+   background-color: var(--j1);
+}
+
+.fora.j2{
+    border-color: var(--j2);
+}
+
+.peça.j2{
+    background-color: var(--j2);
+}
+
+.tabuleiro{
+    background-color: whitesmoke;
+    display: grid;
+    gap: 3px;
+    padding: 3px;
+    margin: 10px;
+}
+
+.bloco{
+    background-color: dimgray;
+    aspect-ratio: 1/1;
+    width: var(--bloco_size); /*would love to make it not fix but relative to parents size*/
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#mensagens{
+    border: solid;
+    border-color: grey;
+    padding: 3px;
+    margin: 10px;
+    width: calc(var(--bloco_size)*5);
+}
+
+#timer {
+    background-color: greenyellow;
+    color: black;
+    font-size:xx-large;
+    margin: 1%;
+    padding: 1%;
+    text-align: center;
+    line-height: 100%;
+}
+
+/*side*/
+.sidebar{
+    flex-basis: 20%;
+    align-items: stretch;
+    display: flex;
+    flex-direction: column;
+    align-content: stretch;
+    align-items: stretch;
+    margin: 1px;
 }
 
 .logo{
@@ -45,86 +237,17 @@ html,body{
     object-fit: scale-down;
 }
 
-.tab_main{
-    display: flex;
-}
-
-#mensagens{
-    border: solid;
-    border-color: grey;
-    padding: 3px;
-    margin: 10px;
-    width: calc(var(--bloco_size)*5);
-}
-
-.tabuleiro{
-    background-color: whitesmoke;
-    display: grid;
-    gap: 3px;
-    padding: 3px;
-    margin: 10px;
-}
-
-.fora{
-    width: calc(var(--peça_size)*3.2);
-    border: solid;
-    border-color: var(--j1);
-    padding: 3px;
-    margin: 10px;
-    display: flex;
-    flex-wrap: wrap;
-    align-content: flex-start;
-    gap: 2px;
-}
-
-.fora.j1{
-    border-color: var(--j1);
-    flex-flow: row-reverse wrap-reverse;
-}
-
-.fora.j2{
-    border-color: var(--j2);
-}
-
-.peça{
-    aspect-ratio: 1/1;
-    width: var(--peça_size);
-    border-radius: 50%;
-    display: inline-block;
-}
-
-.peça.j1{
-   background-color: var(--j1);
-}
-
-.peça.j2{
-    background-color: var(--j2);
-}
-
-.bloco{
-    background-color: dimgray;
-    aspect-ratio: 1/1;
-    width: var(--bloco_size); /*would love to make it not fix but relative to parents size*/
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.sidebar{
-    flex-basis: 20%;
-    align-items: stretch;
-    display: flex;
-    flex-direction: column;
-    align-content: stretch;
-    align-items: stretch;
-    margin: 1px;
-}
-
 .login{
     background-color: gray;
     border-radius: 7px;
     padding: 2%;
     margin: 1px;
+}
+
+#logged{
+    display: none;
+    justify-content: space-between;
+    align-items: flex-start;
 }
 
 .options{
@@ -136,51 +259,17 @@ html,body{
     line-height: 1;
 }
 
+/*general stuff*/
+.img_click{
+    cursor: pointer;
+}
+
 .fechar{
     float: right;
     position: relative;
     top: -3%;
     cursor: pointer;
     font-size: 35px;
-}
-
-#instruções{
-    flex-basis: 74%; 
-    background-color: lightgrey;
-    border-radius: 7px;
-    display: none; 
-    padding: 3%;
-    margin: 1px;
-
-    color: black; 
-    font-size: larger;
-    line-height: 120%;
-}
-
-
-#instruções img{
-    width: 200px;
-    height: 200px;
-    
-    object-fit: scale-down;
-}
-
-#fim {
-    display: none;
-    background-color: darkcyan;
-    color: black;
-    font-size: xx-large;
-    transition: all 0.5s ease-in-out;
-    align-items: center;
-    border-radius: 40px;
-    padding: 3px;
-    margin: 10px;
-
-    text-align: center;
-}
-
-#fim_inner {
-    margin: auto;
 }
 
 .destacado{
@@ -215,7 +304,7 @@ select{
 option {
     background-color: rgb(27,55,117);
     color: white;
-  }
+}
 
 input[type="radio"] + label {
     display: inline-block;
@@ -230,56 +319,4 @@ input[type="radio"]:checked + label {
     background-color: rgb(27,55,117);
     color: #fff;
     border-color: rgb(27,55,117);
-}
-
-#classificações{
-    display: none; 
-    background-color: rgba(0,0,0,.5);
-    color: white; 
-    font-size: large;
-    position: absolute; 
-    padding: 1%;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    transition: all 0.5s ease-in-out;
-   
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-}
-
-#classificações_inner{
-    display: block;
-    background-color: rgb(33, 34, 36);
-    opacity: 90%;
-    padding: 1%;
-    margin: 5pt;
-    border-radius: 2%;
-}
-
-.table {
-    border-spacing: 0;
-    width: 100%;
-    padding: 5%;
-  }
-  
-  .th, .td {
-    text-align: left;
-    padding: 5%;
-  }
-  
-  .tr:nth-child(even) {
-    background-color: #f2f2f2
-  }
-
-#timer {
-    background-color: greenyellow;
-    color: black;
-    font-size:xx-large;
-    margin: 1%;
-    padding: 1%;
-    text-align: center;
-    line-height: 100%;
 }
