@@ -130,7 +130,6 @@ class Game {
             openEnd();
         } else {
             this.login.leave();
-            disableButtons(true,false,false,false);
         }  
     }   
 

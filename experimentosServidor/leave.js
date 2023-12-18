@@ -5,7 +5,7 @@ module.exports.f = function (request, response){
 
     if (request.method == 'POST') {
 
-        let data_req;
+        let data_req = "";
 
         //store the data send by request
         request.on('data', function(chunk) {
@@ -16,6 +16,7 @@ module.exports.f = function (request, response){
 
         //process the data after everything is received
         request.on('end', function() {
+            console.log(data_req);
             console.log("Sending back answer");
             response.writeHead(200, {'Access-Control-Allow-Origin': '*', 'Cache-Control': 'no-cache'});
             response.end();

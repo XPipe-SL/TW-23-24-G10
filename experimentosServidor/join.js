@@ -1,7 +1,10 @@
 // TODO: error checking, game logging
 
 const crypto = require('crypto');
+const gs = require('./gameState.js');
 
+// Returns the hash if the game can be added
+// Otherwise doesn't return
 module.exports.f = function (request, response){
     console.log('join requested');
 
@@ -22,8 +25,10 @@ module.exports.f = function (request, response){
 
             //console.log(data_req);
             
-            let game_id = JSON.stringify({"game":hashing(data_req)});
+            let game_id = hashing(data_req);
+            let game_json = JSON.stringify({"game":game_id});
             console.log(game_id);
+            console.log(game_json);
 
             console.log("writing headers");
 
@@ -33,9 +38,12 @@ module.exports.f = function (request, response){
                 "Connection": "keep-alive"
             });
 
-            response.write(game_id);
+            response.write(game_json);
 
             response.end();
+
+            // Add game to list of games
+            gs.addGame(game_id);
 
         } );
 

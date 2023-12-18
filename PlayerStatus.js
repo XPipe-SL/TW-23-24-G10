@@ -110,7 +110,7 @@ class PlayerStatus {
     }
 
     update() { //nick game
-        const url = 'http://twserver.alunos.dcc.fc.up.pt:8008/update?nick=' + encodeURIComponent(this.nick) + '&game=' + encodeURIComponent(this.game);
+        const url = server+'/update?nick=' + encodeURIComponent(this.nick) + '&game=' + encodeURIComponent(this.game);
         const eventSource = new EventSource(url);
         var searching = true;
         var piece = 1;

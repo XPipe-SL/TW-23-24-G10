@@ -12,7 +12,16 @@ const ranking = require('./ranking.js')
 
 http.createServer((request,response) => {
     // console.log(request.method);
-    switch(request.url) { 
+    //console.log(request.url);
+
+    let parsedUrl = url.parse(request.url);
+    let pathname = parsedUrl.pathname;
+    let query = parsedUrl.query;
+
+    console.log(pathname);
+    //console.log(query);
+
+    switch(pathname) { 
     case '/register':
         register.f(request,response);
         //response.end();
@@ -27,7 +36,7 @@ http.createServer((request,response) => {
         response.end('notify not possible yet');
         break;
     case '/update':
-        update.f(request, response);
+        update.f(query, request, response);
         response.end('update not possible yet');
         break;
     case '/leave':
