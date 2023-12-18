@@ -32,9 +32,11 @@ module.exports.f = function (request, response){
             //}
             fsp.readFile('./files/ranking.txt','utf8')
                 .then( (data) => { 
+                    //console.log("File read complete");
                     const data_file = JSON.parse(data.toString());
                     //check if data for the right dimensions already exists
                     //if no, send back empty response (I guess?)
+                    console.log("Checking dimensions");
                     if (data_file[dim]==undefined) {
                         console.log("no data for dimensions jet")
                         to_write = JSON.stringify({"ranking":[]});

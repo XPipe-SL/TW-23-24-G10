@@ -286,7 +286,7 @@ class PlayerStatus {
     }
 
     ranking(linhas, colunas) {
-        fetch('http://twserver.alunos.dcc.fc.up.pt:8008/ranking', {
+        fetch(server+'/ranking', {
             method: 'POST',
             headers: {'Content-type': 'application/json'},
             body: JSON.stringify({group: 10, size: {rows: linhas, columns: colunas}})
