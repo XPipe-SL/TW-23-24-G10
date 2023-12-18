@@ -36,19 +36,28 @@ module.exports.f = function (query, request, response){
                 sentTwo = true;
             else
                 gs.deleteGame(game.game);
-        } else
         
-
-        if (game.turnN == 0) {
+        } else {
             let players = JSON.parse('{"' + game.white + '":"white", "' + game.black + '":"black"}');
 
-            data = JSON.stringify({
-                'board':game.board,
-                'phase':game.phase,
-                'step':game.step,
-                'turn':game.turn,
-                'players':players
-            });
+            if (game.turnN == 0) {
+                data = JSON.stringify({
+                    'board':game.board,
+                    'phase':game.phase,
+                    'step':game.step,
+                    'turn':game.turn,
+                    'players':players
+                });
+            } else {
+                data = JSON.stringify({
+                    'board':game.board,
+                    'phase':game.phase,
+                    'step':game.step,
+                    'turn':game.turn,
+                    'players':players,
+                    'move':game.move
+                });
+            }
 
         }
         

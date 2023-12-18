@@ -29,7 +29,7 @@ module.exports.f = function (request, response){
             pw_h = hashing(pw);
             //console.log(pw_h);
             //read file
-            fsp.readFile('./files/login.txt','utf8')
+            fsp.readFile('./server/files/login.txt','utf8')
                 .then( (data) => { 
                     const data_file = JSON.parse(data.toString());
                     //console.log(data_file);

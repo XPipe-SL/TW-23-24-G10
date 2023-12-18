@@ -30,7 +30,7 @@ module.exports.f = function (request, response){
             //                  {"nick": nick2, "games": #games, "victories": #victories} ...
             //                  ]}
             //}
-            fsp.readFile('./files/ranking.txt','utf8')
+            fsp.readFile('./server/files/ranking.txt','utf8')
                 .then( (data) => { 
                     //console.log("File read complete");
                     const data_file = JSON.parse(data.toString());

@@ -24,7 +24,7 @@ class gameState {
         this.turn = this.white;
         this.turnN = 0;
 
-        this.phase = "drop";
+        this.phase = undefined;
         this.step = "from";
     }
 }
@@ -92,4 +92,47 @@ module.exports.getGame = function(hash) {
     }
 
     return -1;
+}
+
+// Applies move to gameState
+module.exports.applyMove = function(nick, hash, move) {
+    let pos = games.findIndex((game) => game.game == hash);
+
+    if (pos>-1) {
+        if (games[pos].turn == nick) {
+
+            // Phase 1
+            if (games[pos].turnN < 24) {
+                games[pos].phase = games[pos].turnN <23 ? "drop": "move";
+
+                // Update board
+                // Naive update
+                games[pos].move = move;
+                
+                games[pos].board[move.row][move.column] = games[pos].white == nick ? "white" : "black";
+
+                games[pos].turnN++;
+                games[pos].turn = games[pos].white == nick ? games[pos].black : games[pos].white;
+            
+            // Phase 2
+            } else {
+                games[pos].move = move;
+
+                switch (games[pos].step) {
+                    case "from":
+                        games[pos].step = "to";
+                        break;
+
+                    case "to":
+                        
+                        break;
+
+                }
+                
+                //games[pos].turnN++;
+                //games[pos].turn = games[pos].white == nick ? games[pos].black : games[pos].white;
+            }
+
+        }
+    }
 }

@@ -2,13 +2,13 @@ const http = require('http');
 const path = require('path');
 const url  = require('url');
 const fs   = require('fs');
-const conf = require('./conf.js'); 
-const register = require('./register.js'); 
-const join = require('./join.js'); 
-const notify = require('./notify.js')
-const update = require('./update.js')
-const leave = require('./leave.js')
-const ranking = require('./ranking.js')
+const conf = require('./server/conf.js'); 
+const register = require('./server/register.js'); 
+const join = require('./server/join.js'); 
+const notify = require('./server/notify.js')
+const update = require('./server/update.js')
+const leave = require('./server/leave.js')
+const ranking = require('./server/ranking.js')
 
 http.createServer((request,response) => {
     // console.log(request.method);
@@ -33,7 +33,7 @@ http.createServer((request,response) => {
         break;
     case '/notify':
         notify.f(request, response);
-        response.end('notify not possible yet');
+        //response.end('notify not possible yet');
         break;
     case '/update':
         update.f(query, request, response);

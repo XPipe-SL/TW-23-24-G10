@@ -91,17 +91,13 @@ class PlayerStatus {
     notify(row, column) { //nick password game move
         const move = JSON.parse('{"row": ' + row + ', "column": ' + column + '}');
         
-        fetch('http://twserver.alunos.dcc.fc.up.pt:8008/notify', {
+        fetch(server+'/notify', {
             method: 'POST',
             headers: {'Content-type': 'application/json'},
             body: JSON.stringify({ nick: this.nick, password: this.password, game: this.game, move: move})
         })
         .then((response) => {
-            if (response.ok) {
-                return response.json().then(data => {
-                    console.log(data);
-                })
-            } else {
+            if (!response.ok) {
                 return response.json().then(data => {
                     console.log('error:', data);
                 })
