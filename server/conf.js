@@ -1,4 +1,4 @@
-module.exports.port = 8007;
+module.exports.port = 8110;
 module.exports.mediaTypes = {
     'txt':      'text/plain',
     'html':     'text/html',

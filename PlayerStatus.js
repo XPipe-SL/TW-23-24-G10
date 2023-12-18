@@ -1,5 +1,5 @@
 // Stores server url
-const server = "http://localhost:8007"
+const server = "http://twserver.alunos.dcc.fc.up.pt:8110"
 
 class PlayerStatus {
     constructor(nick, password) {
