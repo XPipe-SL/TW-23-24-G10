@@ -43,9 +43,12 @@ class PlayerStatus {
         if(game.againstAI) {
             game.restore();
         } else {
+            console.log("Abandonando");
             this.leave();
-            
+            console.log("fin");
         }
+
+        console.log("yay");
         
         game.timer.stop();
         document.getElementById("timer").innerHTML = '02:00'; 
@@ -253,7 +256,7 @@ class PlayerStatus {
                     game.timer.stop();
                     openEnd();
                 } else { //not joinned
-                    disableButtons(true,true,false,false);
+                    disableButtons(true,false,false,false);
                     game.restore();
                 }
                 this.ranking(6, 5);

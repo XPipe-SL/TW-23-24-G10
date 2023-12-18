@@ -32,7 +32,7 @@ http.createServer((request,response) => {
         break;
     case '/leave':
         leave.f(request,response);
-        response.end('leaving not possible yet');
+        //response.end('leaving not possible yet');
         break;
     case '/ranking':
         ranking.f(request, response);

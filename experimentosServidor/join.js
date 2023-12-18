@@ -6,9 +6,9 @@ module.exports.f = function (request, response){
     console.log('join requested');
 
     if (request.method == 'POST') {
-        console.log("Is post");
+        //console.log("Is post");
 
-        let data_req = "";
+        let data_req;
 
         //store the data send by request
         request.on('data', function(chunk) {
@@ -18,7 +18,7 @@ module.exports.f = function (request, response){
         });
 
         //process the data after everything is received
-        request.on('end', function(){
+        request.on('end', function() {
 
             //console.log(data_req);
             
@@ -37,7 +37,7 @@ module.exports.f = function (request, response){
 
             response.end();
 
-        });
+        } );
 
         request.on('error', (err) => { console.log(err.message); } );
     
