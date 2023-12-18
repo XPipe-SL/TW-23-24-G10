@@ -1,4 +1,4 @@
-// TODO: error checking, game logging
+// TODO: error checking
 
 const crypto = require('crypto');
 const gs = require('./gameState.js');
@@ -11,7 +11,7 @@ module.exports.f = function (request, response){
     if (request.method == 'POST') {
         //console.log("Is post");
 
-        let data_req;
+        let data_req = "";
 
         //store the data send by request
         request.on('data', function(chunk) {
@@ -23,12 +23,19 @@ module.exports.f = function (request, response){
         //process the data after everything is received
         request.on('end', function() {
 
-            //console.log(data_req);
+            // console.log(data_req);
+            let data = JSON.parse(data_req);
+            //console.log(data.nick);
             
-            let game_id = hashing(data_req);
+            let game_id = hashing(data_req+JSON.stringify(new Date()));
+
+            // Add game to list of games
+            // Or find already existing game
+            game_id = gs.findGame(game_id, data.nick, data.size);
+
             let game_json = JSON.stringify({"game":game_id});
-            console.log(game_id);
-            console.log(game_json);
+            //console.log(game_id);
+            //console.log(game_json);
 
             console.log("writing headers");
 
@@ -41,9 +48,6 @@ module.exports.f = function (request, response){
             response.write(game_json);
 
             response.end();
-
-            // Add game to list of games
-            gs.addGame(game_id);
 
         } );
 

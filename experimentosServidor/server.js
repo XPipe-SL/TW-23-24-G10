@@ -18,7 +18,7 @@ http.createServer((request,response) => {
     let pathname = parsedUrl.pathname;
     let query = parsedUrl.query;
 
-    console.log(pathname);
+    //console.log(pathname);
     //console.log(query);
 
     switch(pathname) { 

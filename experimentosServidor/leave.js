@@ -1,4 +1,5 @@
-// TODO: error checking, game status check and management
+// TODO: error checking
+const gs = require('./gameState.js');
 
 module.exports.f = function (request, response){
     console.log('leave requested');
@@ -16,10 +17,14 @@ module.exports.f = function (request, response){
 
         //process the data after everything is received
         request.on('end', function() {
-            console.log(data_req);
-            console.log("Sending back answer");
+            //console.log(data_req);
+            //console.log("Sending back answer");
+            let data = JSON.parse(data_req);
             response.writeHead(200, {'Access-Control-Allow-Origin': '*', 'Cache-Control': 'no-cache'});
             response.end();
+
+            // Mark the game as finished
+            gs.endGame(data.game);
         } );
 
         request.on('error', (err) => { console.log(err.message); } );
