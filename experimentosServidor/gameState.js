@@ -51,15 +51,21 @@ module.exports.findGame = function(hash, nick, size) {
 
 module.exports.deleteGame = function(hash) {
     console.log(games);
-    let pos = games.findIndex((gh) => gh == hash);
+    let pos = games.findIndex((game) => game.game == hash);
     if (pos>-1) games.splice(pos, 1);
     console.log(games);
 }
 
-module.exports.endGame = function(hash) {
+module.exports.endGame = function(hash, nick) {
     let pos = games.findIndex((game) => game.game == hash);
 
-    if (pos>-1) games[pos].winner = "null";
+    if (pos>-1) {
+        if (games[pos].black != undefined) {
+            games[pos].winner = games[pos].white == nick? games[pos].black : games[pos].white;
+        } else {
+            games[pos].winner = "null";
+        }
+    }
 }
 
 // Checks if there's an incomplete game with the same size

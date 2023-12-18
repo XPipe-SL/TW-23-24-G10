@@ -1,4 +1,5 @@
 const gs = require('./gameState.js');
+let sentTwo = false;
 
 module.exports.f = function (query, request, response){
     console.log('update requested');
@@ -22,10 +23,20 @@ module.exports.f = function (query, request, response){
         if (game.winner == "null") {
             data = JSON.stringify( {'winner':null} );
             response.write('data: ' + data + '\n\n');
+            gs.deleteGame(game.game);
         }
     }
 
     if (!game.waiting) {
+        if (game.winner == game.white || game.winner == game.black) {
+            data = JSON.stringify( {'winner':game.winner } );
+
+            // It has to be sent to both players
+            if (!sentTwo) 
+                sentTwo = true;
+            else
+                gs.deleteGame(game.game);
+        } else
         
 
         if (game.turnN == 0) {

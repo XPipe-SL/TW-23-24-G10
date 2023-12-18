@@ -24,7 +24,7 @@ module.exports.f = function (request, response){
             response.end();
 
             // Mark the game as finished
-            gs.endGame(data.game);
+            gs.endGame(data.game, data.nick);
         } );
 
         request.on('error', (err) => { console.log(err.message); } );
